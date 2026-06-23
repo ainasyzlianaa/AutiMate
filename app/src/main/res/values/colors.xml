@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Light Mode Backgrounds -->
+    <color name="cream">#F5EDE4</color>
+    <color name="white">#FFFFFF</color>
+    <color name="beige">#EDE5D9</color>
+
+    <!-- Light Mode Text -->
+    <color name="text_dark">#3B1F0A</color>
+    <color name="light_brown">#8B6347</color>
+    <color name="brown">#6D4C41</color>
+
+    <!-- Light Mode Accents -->
+    <color name="soft_blue">#4A9BD9</color>
+    <color name="khaki">#C4A882</color>
+    <color name="divider">#D4C5B0</color>
+
+    <!-- Light Mode Cards -->
+    <color name="card_routine_bg">#E0F2FF</color>
+    <color name="card_game_bg">#DFFADF</color>
+    <color name="card_reward_bg">#EDE0FF</color>
+
+    <!-- FIXED WHITE - Same in both light and dark mode -->
+    <color name="fixed_white">#FFFFFF</color>
+    <color name="green">#4CAF50</color>
+    <color name="yellow">#FFC107</color>
+    <color name="orange">#FF9800</color>
+
+    <!-- Calendar Colors -->
+    <color name="calendar_completed">#4A9BD9</color>
+    <color name="calendar_partial">#F5A623</color>
+    <color name="calendar_normal">#E0E0E0</color>
+    <color name="calendar_empty">#F5F5F5</color>
+    <color name="calendar_today">#4A9BD9</color>
+</resources>

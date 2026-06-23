@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_account"
+        android:title="Account"
+        android:icon="@android:drawable/ic_menu_my_calendar" />
+
+    <item
+        android:id="@+id/nav_profile"
+        android:title="Profile"
+        android:icon="@android:drawable/ic_menu_edit" />
+
+    <item
+        android:id="@+id/nav_progress_tracker"
+        android:title="Progress Tracker"
+        android:icon="@android:drawable/ic_menu_report_image" />
+
+    <item
+        android:id="@+id/nav_add_activity"
+        android:title="Add New Activity"
+        android:icon="@android:drawable/ic_menu_add" />
+
+    <item
+        android:id="@+id/nav_view_rewards"
+        android:title="View Rewards"
+        android:icon="@android:drawable/ic_menu_gallery" />
+
+    <item
+        android:id="@+id/nav_theme"
+        android:title="Customize Theme"
+        android:icon="@android:drawable/ic_menu_preferences" />
+
+    <item
+        android:id="@+id/nav_logout"
+        android:title="Logout"
+        android:icon="@android:drawable/ic_menu_close_clear_cancel" />
+
+</menu>

@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/cream">
+
+    <!-- Header with Back Button -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_back"
+            android:padding="8dp"
+            android:clickable="true"/>
+
+        <TextView
+            android:id="@+id/taskTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Brush Teeth"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_dark"
+            android:gravity="center"/>
+
+        <TextView
+            android:id="@+id/tvStepProgress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1/5"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/soft_blue"
+            android:background="@drawable/progress_badge"
+            android:padding="6dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"/>
+
+    </LinearLayout>
+
+    <!-- Progress Dots -->
+    <LinearLayout
+        android:id="@+id/progressDots"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Content with Arrow Navigation -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:padding="8dp">
+
+        <!-- Left Arrow -->
+        <ImageView
+            android:id="@+id/btnPrev"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_arrow_left"
+            android:padding="10dp"
+            android:layout_marginEnd="8dp"
+            android:clickable="true"
+            android:background="@drawable/arrow_circle_bg"/>
+
+        <!-- Step Card -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardRoutine"
+            android:layout_width="0dp"
+            android:layout_height="450dp"
+            android:layout_weight="1"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="@color/fixed_white"
+            android:layout_marginHorizontal="8dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="20dp">
+
+                <!-- Video Container -->
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="280dp"
+                    android:layout_marginBottom="20dp"
+                    android:background="@color/fixed_white">
+
+                    <VideoView
+                        android:id="@+id/stepVideo"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"/>
+
+                    <ProgressBar
+                        android:id="@+id/videoProgressBar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:visibility="gone"/>
+
+                </FrameLayout>
+
+                <!-- Step Number with Speaker Icon NEXT to it -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="8dp">
+
+                    <TextView
+                        android:id="@+id/stepNumber"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Step 1:"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/soft_blue"
+                        android:layout_marginEnd="12dp"/>
+
+                    <!-- Speaker Icon NEXT to Step Number -->
+                    <ImageView
+                        android:id="@+id/btnSpeak"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/ic_speaker"
+                        android:padding="4dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="@drawable/speaker_circle_bg"
+                        android:contentDescription="Read aloud"/>
+
+                </LinearLayout>
+
+                <!-- Step Instruction -->
+                <TextView
+                    android:id="@+id/stepInstruction"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Take a toothbrush"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_dark"
+                    android:gravity="center"
+                    android:lineSpacingExtra="8dp"/>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Right Arrow -->
+        <ImageView
+            android:id="@+id/btnNext"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_arrow_right"
+            android:padding="10dp"
+            android:layout_marginStart="8dp"
+            android:clickable="true"
+            android:background="@drawable/arrow_circle_bg"/>
+
+    </LinearLayout>
+
+    <!-- FINISH BUTTON -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp">
+
+        <Button
+            android:id="@+id/btnFinish"
+            android:layout_width="180dp"
+            android:layout_height="50dp"
+            android:text="FINISH"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/soft_blue"
+            app:cornerRadius="25dp"
+            android:visibility="gone"/>
+
+    </LinearLayout>
+
+    <!-- Bottom Hint -->
+    <TextView
+        android:id="@+id/tvNavigationHint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tap arrows to navigate"
+        android:textSize="12sp"
+        android:textColor="@color/light_brown"
+        android:layout_gravity="center"
+        android:layout_marginBottom="16dp"
+        android:alpha="0.7"/>
+
+</LinearLayout>

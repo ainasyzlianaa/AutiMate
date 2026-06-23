@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@color/white"
+    android:elevation="8dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="🎁"
+        android:textSize="48sp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Reward Shop"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="@color/text_dark"
+        android:layout_gravity="center"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:id="@+id/tvRewardPoints"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="You have 0 points!"
+        android:textSize="14sp"
+        android:textColor="@color/light_brown"
+        android:layout_gravity="center"
+        android:layout_marginBottom="24dp" />
+
+    <Button
+        android:id="@+id/btnClaim"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="CLAIM REWARD"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        android:backgroundTint="@color/soft_blue"
+        app:cornerRadius="24dp" />
+
+</LinearLayout>

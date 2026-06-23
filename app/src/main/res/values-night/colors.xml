@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark Mode Backgrounds -->
+    <color name="cream">#1A1A1A</color>
+    <color name="white">#2C2C2C</color>
+    <color name="beige">#3A3028</color>
+    <color name="dark_bg">#1A1A1A</color>
+    <color name="dark_bg_darker">#121212</color>
+    <color name="dark_card_bg">#2C2C2C</color>
+
+    <!-- Dark Mode Text -->
+    <color name="text_dark">#E8E0D8</color>
+    <color name="light_brown">#B8A898</color>
+    <color name="brown">#A08070</color>
+    <color name="dark_text_primary">#E8E0D8</color>
+    <color name="dark_text_secondary">#B8A898</color>
+
+    <!-- Dark Mode Accents -->
+    <color name="soft_blue">#5BA3E3</color>
+    <color name="khaki">#D4A84A</color>
+    <color name="divider">#4A3F38</color>
+
+    <!-- Dark Mode Cards -->
+    <color name="card_routine_bg">#1A2A3A</color>
+    <color name="card_game_bg">#1A2A1A</color>
+    <color name="card_reward_bg">#2A1A3A</color>
+
+    <!-- Fixed Colors -->
+    <color name="fixed_white">#FFFFFF</color>
+
+    <!-- Additional Colors -->
+    <color name="green">#66BB6A</color>
+    <color name="yellow">#FFD54F</color>
+    <color name="orange">#FFA726</color>
+</resources>

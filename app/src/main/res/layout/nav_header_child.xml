@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="24dp"
+    android:background="@color/beige">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        app:cardCornerRadius="35dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="@color/white">
+
+        <TextView
+            android:id="@+id/headerProfileIcon"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="👧"
+            android:textSize="35sp"
+            android:gravity="center"/>
+
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:id="@+id/tvChildName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Child Account"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="@color/text_dark"
+        android:layout_marginTop="12dp"/>
+
+    <TextView
+        android:id="@+id/tvChildStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="● Active"
+        android:textSize="10sp"
+        android:textColor="@color/soft_blue"
+        android:layout_marginTop="4dp"/>
+
+</LinearLayout>

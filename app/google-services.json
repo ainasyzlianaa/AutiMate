@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1090518612382",
+    "project_id": "autimate-ed837",
+    "storage_bucket": "autimate-ed837.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1090518612382:android:71c9b0cc77b138f1913e8f",
+        "android_client_info": {
+          "package_name": "com.example.autimate"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBDwAPd6pWs-w3p_mPNnOekko2iH2MzORw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
