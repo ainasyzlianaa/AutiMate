@@ -1,58 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="24dp"
-    android:background="@drawable/dialog_bg">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="🎁"
-        android:textSize="48sp"
-        android:layout_gravity="center"
-        android:layout_marginBottom="16dp" />
-
-    <TextView
-        android:id="@+id/tvClaimMessage"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="You have 120 points!"
-        android:textSize="14sp"
-        android:textColor="@color/text_dark"
-        android:gravity="center"
-        android:layout_marginBottom="24dp" />
+    app:cardCornerRadius="24dp"
+    app:cardElevation="8dp"
+    app:cardBackgroundColor="@color/white"
+    android:layout_margin="24dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:orientation="vertical"
+        android:padding="32dp"
         android:gravity="center">
 
-        <Button
-            android:id="@+id/btnLater"
-            android:layout_width="0dp"
-            android:layout_height="44dp"
-            android:layout_weight="1"
-            android:text="LATER"
-            android:textSize="13sp"
-            android:textColor="@color/light_brown"
-            android:background="@android:color/transparent"
-            android:layout_marginEnd="8dp" />
+        <!-- Gift Icon -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🎁"
+            android:textSize="56sp"
+            android:layout_marginBottom="16dp" />
 
-        <Button
-            android:id="@+id/btnClaim"
-            android:layout_width="0dp"
-            android:layout_height="44dp"
-            android:layout_weight="1"
-            android:text="CLAIM"
-            android:textSize="13sp"
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Claim Your Reward"
+            android:textSize="22sp"
             android:textStyle="bold"
-            android:textColor="@color/white"
-            android:backgroundTint="@color/khaki"
-            android:layout_marginStart="8dp" />
+            android:textColor="@color/soft_blue"
+            android:textAlignment="center"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:id="@+id/tvClaimMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="You have 50 points!"
+            android:textSize="15sp"
+            android:textColor="@color/text_dark"
+            android:textAlignment="center"
+            android:layout_marginBottom="24dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <Button
+                android:id="@+id/btnLater"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:text="LATER"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_dark"
+                android:backgroundTint="@color/khaki"
+                android:layout_marginEnd="8dp"
+                app:cornerRadius="24dp" />
+
+            <Button
+                android:id="@+id/btnClaim"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:text="CLAIM"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/soft_blue"
+                android:layout_marginStart="8dp"
+                app:cornerRadius="24dp" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
-</LinearLayout>
+</androidx.cardview.widget.CardView>

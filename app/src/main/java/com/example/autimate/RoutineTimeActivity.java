@@ -8,15 +8,27 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class RoutineTimeActivity extends AppCompatActivity {
 
     private ImageView btnBack;
-    private CardView cardBrushTeeth, cardEatFoods, cardWashHands, cardNap, cardSleep;
+    private TextView tvEmptyMessage;
+    private CardView cardBrushTeeth, cardEatFoods, cardWashHands, cardSleep;
     private CardView cardPackBag, cardWearClothes;
+    private String childId;
+    private String parentId;
+    private FirebaseFirestore db;
+    private List<String> activityNames = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,8 +36,10 @@ public class RoutineTimeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_routine_time);
 
         try {
-            // Initialize views
+            db = FirebaseFirestore.getInstance();
+
             btnBack = findViewById(R.id.btnBack);
+            tvEmptyMessage = findViewById(R.id.tvEmptyMessage);
             cardBrushTeeth = findViewById(R.id.cardBrushTeeth);
             cardEatFoods = findViewById(R.id.cardEatFoods);
             cardWashHands = findViewById(R.id.cardWashHands);
@@ -37,13 +51,11 @@ public class RoutineTimeActivity extends AppCompatActivity {
                 btnBack.setOnClickListener(v -> finish());
             }
 
-            // Hide all cards first
-            hideAllCards();
+            childId = getSharedPreferences("ChildPrefs", MODE_PRIVATE).getString("childId", "");
+            parentId = getSharedPreferences("ParentPrefs", MODE_PRIVATE).getString("parentId", "");
 
-            // Load and show saved activities
-            loadSavedActivities();
+            loadActivities();
 
-            // Register broadcast receiver
             IntentFilter filter = new IntentFilter("ACTIVITIES_UPDATED");
             registerReceiver(activityUpdateReceiver, filter);
 
@@ -53,27 +65,64 @@ public class RoutineTimeActivity extends AppCompatActivity {
         }
     }
 
-    private void hideAllCards() {
-        if (cardBrushTeeth != null) cardBrushTeeth.setVisibility(View.GONE);
-        if (cardEatFoods != null) cardEatFoods.setVisibility(View.GONE);
-        if (cardWashHands != null) cardWashHands.setVisibility(View.GONE);
-        if (cardNap != null) cardNap.setVisibility(View.GONE);
-        if (cardSleep != null) cardSleep.setVisibility(View.GONE);
-        if (cardPackBag != null) cardPackBag.setVisibility(View.GONE);
-        if (cardWearClothes != null) cardWearClothes.setVisibility(View.GONE);
-    }
+    private void loadActivities() {
+        // Hide all cards first
+        hideAllCards();
 
-    private void loadSavedActivities() {
-        SharedPreferences prefs = getSharedPreferences("RoutinePrefs", MODE_PRIVATE);
-        String savedActivities = prefs.getString("activities", "");
-
-        if (savedActivities.isEmpty()) {
-            showDefaultActivities();
+        if (childId == null || childId.isEmpty()) {
+            showEmptyMessage();
             return;
         }
 
-        String[] activities = savedActivities.split(",");
-        for (String activity : activities) {
+        // Load from child's activities array in Firestore
+        db.collection("children").document(childId).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        // Get activities array from child document
+                        List<String> activities = (List<String>) documentSnapshot.get("activities");
+
+                        if (activities != null && !activities.isEmpty()) {
+                            activityNames.clear();
+                            activityNames.addAll(activities);
+
+                            // Save to SharedPreferences for faster access
+                            saveActivitiesToPrefs();
+
+                            // Display the activities
+                            displayActivities();
+                        } else {
+                            // No activities found - show empty message
+                            showEmptyMessage();
+                        }
+                    } else {
+                        showEmptyMessage();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    showEmptyMessage();
+                });
+    }
+
+    private void showEmptyMessage() {
+        hideAllCards();
+        if (tvEmptyMessage != null) {
+            tvEmptyMessage.setVisibility(View.VISIBLE);
+            tvEmptyMessage.setText("No activities added yet.\nAsk your parent to add activities for you! 🌟");
+        }
+    }
+
+    private void displayActivities() {
+        hideAllCards();
+        if (tvEmptyMessage != null) {
+            tvEmptyMessage.setVisibility(View.GONE);
+        }
+
+        if (activityNames.isEmpty()) {
+            showEmptyMessage();
+            return;
+        }
+
+        for (String activity : activityNames) {
             switch (activity) {
                 case "Brush Teeth":
                     if (cardBrushTeeth != null) {
@@ -115,25 +164,63 @@ public class RoutineTimeActivity extends AppCompatActivity {
         }
     }
 
-    private void showDefaultActivities() {
-        if (cardBrushTeeth != null) {
-            cardBrushTeeth.setVisibility(View.VISIBLE);
-            cardBrushTeeth.setOnClickListener(v -> openBrushTeeth());
-        }
-        if (cardEatFoods != null) {
-            cardEatFoods.setVisibility(View.VISIBLE);
-            cardEatFoods.setOnClickListener(v -> openEatFoods());
-        }
-        if (cardWashHands != null) {
-            cardWashHands.setVisibility(View.VISIBLE);
-            cardWashHands.setOnClickListener(v -> openWashHands());
-        }
-        if (cardSleep != null) {
-            cardSleep.setVisibility(View.VISIBLE);
-            cardSleep.setOnClickListener(v -> openSleep());
-        }
+    private void hideAllCards() {
+        if (cardBrushTeeth != null) cardBrushTeeth.setVisibility(View.GONE);
+        if (cardEatFoods != null) cardEatFoods.setVisibility(View.GONE);
+        if (cardWashHands != null) cardWashHands.setVisibility(View.GONE);
+        if (cardSleep != null) cardSleep.setVisibility(View.GONE);
+        if (cardPackBag != null) cardPackBag.setVisibility(View.GONE);
+        if (cardWearClothes != null) cardWearClothes.setVisibility(View.GONE);
     }
 
+    private void saveActivitiesToPrefs() {
+        StringBuilder sb = new StringBuilder();
+        for (String activity : activityNames) {
+            if (sb.length() > 0) sb.append(",");
+            sb.append(activity);
+        }
+        getSharedPreferences("RoutinePrefs", MODE_PRIVATE)
+                .edit()
+                .putString(getActivityPrefKey(), sb.toString())
+                .apply();
+    }
+
+    private String getActivityPrefKey() {
+        if (childId != null && !childId.isEmpty()) {
+            return "activities_" + childId;
+        }
+        return "activities";
+    }
+
+    // ===================== UPDATED: Pack School Bag =====================
+    private void openPackBag() {
+        openStepDetail("Pack School Bag", new String[]{
+                "Pick your bag",
+                "Open the bag",
+                "Close the bag",
+                "Wear the bag"
+        }, new String[]{
+                "pickbag_test.mp4",
+                "openbag_test.mp4",
+                "closebag_test.mp4",
+                "wearbag_test.mp4"
+        });
+    }
+
+    // ===================== UPDATED: Sleep =====================
+    private void openSleep() {
+        openStepDetail("Sleep", new String[]{
+                "Get ready for bed",
+                "Sit on your bed",
+                "Time to sleep!"
+        }, new String[]{
+                "readysleep_test.mp4",
+                "sitbed_test.mp4",
+                "sleep_test.mp4"
+        });
+    }
+
+    // ===================== OTHER ACTIVITIES (Unchanged) =====================
     private void openBrushTeeth() {
         openStepDetail("Brush Teeth", new String[]{
                 "Take a toothbrush",
@@ -180,38 +267,6 @@ public class RoutineTimeActivity extends AppCompatActivity {
         });
     }
 
-    private void openSleep() {
-        openStepDetail("Sleep Time", new String[]{
-                "Put on pajamas",
-                "Brush your teeth",
-                "Read a book",
-                "Say goodnight",
-                "Sweet dreams!"
-        }, new String[]{
-                "pajamas.mp4",
-                "brushteeth.mp4",
-                "readbook.mp4",
-                "goodnight.mp4",
-                "dreams.mp4"
-        });
-    }
-
-    private void openPackBag() {
-        openStepDetail("Pack School Bag", new String[]{
-                "Open your bag",
-                "Put books inside",
-                "Put pencil case",
-                "Pack lunch box",
-                "Close the bag"
-        }, new String[]{
-                "openbag.mp4",
-                "putbooks.mp4",
-                "pencilcase.mp4",
-                "lunchbox.mp4",
-                "closebag.mp4"
-        });
-    }
-
     private void openWearClothes() {
         openStepDetail("Wear Clothes", new String[]{
                 "Pick your clothes",
@@ -240,8 +295,10 @@ public class RoutineTimeActivity extends AppCompatActivity {
     private final BroadcastReceiver activityUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            hideAllCards();
-            loadSavedActivities();
+            if ("ACTIVITIES_UPDATED".equals(intent.getAction())) {
+                activityNames.clear();
+                loadActivities();
+            }
         }
     };
 
@@ -251,7 +308,7 @@ public class RoutineTimeActivity extends AppCompatActivity {
         try {
             unregisterReceiver(activityUpdateReceiver);
         } catch (Exception e) {
-            e.printStackTrace();
+            // Receiver not registered
         }
     }
 }

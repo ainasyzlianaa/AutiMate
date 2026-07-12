@@ -10,17 +10,26 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class AddNewActivityActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -31,15 +40,22 @@ public class AddNewActivityActivity extends AppCompatActivity implements Navigat
     private Button btnAddNewActivity;
     private TextView tvCurrentActivities;
 
+    private FirebaseFirestore db;
+    private String parentId;
+    private String childId;
+    private String childName;
     private List<ActivityItem> existingActivities;
     private List<ActivityItem> allAvailableActivities;
+    private boolean isLoading = false;
+
+    // Store reference to the add dialog so we can refresh it
+    private AlertDialog addDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_new_activity);
 
-        // Initialize views
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -52,23 +68,37 @@ public class AddNewActivityActivity extends AppCompatActivity implements Navigat
         btnAddNewActivity = findViewById(R.id.btnAddNewActivity);
         tvCurrentActivities = findViewById(R.id.tvCurrentActivities);
 
-        // Setup drawer
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawerLayout, toolbar, R.string.app_name, R.string.app_name);
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
 
-        // Update header
-        updateNavHeader();
+        SharedPreferences childPrefs = getSharedPreferences("ChildPrefs", MODE_PRIVATE);
+        childId = childPrefs.getString("childId", "");
+        childName = childPrefs.getString("childName", "");
+        parentId = getSharedPreferences("ParentPrefs", MODE_PRIVATE).getString("parentId", "");
+        db = FirebaseFirestore.getInstance();
 
-        // Initialize available activities
+        updateNavHeader();
         initAvailableActivities();
 
-        // Load existing activities
-        loadExistingActivities();
+        existingActivities = new ArrayList<>();
 
-        btnAddNewActivity.setOnClickListener(v -> showAddActivityDialog());
+        btnAddNewActivity.setOnClickListener(v -> {
+            try {
+                showAddActivityDialog();
+            } catch (Exception e) {
+                e.printStackTrace();
+                Toast.makeText(this, "Error opening dialog: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadExistingActivities();
     }
 
     private void initAvailableActivities() {
@@ -78,7 +108,7 @@ public class AddNewActivityActivity extends AppCompatActivity implements Navigat
         allAvailableActivities.add(new ActivityItem("Wash Hands", getDrawableId("hands")));
         allAvailableActivities.add(new ActivityItem("Sleep", getDrawableId("sleep")));
         allAvailableActivities.add(new ActivityItem("Pack School Bag", getDrawableId("bag")));
-        allAvailableActivities.add(new ActivityItem("Wear Clothes", getDrawableId("clothes")));
+        // Removed "Wear Clothes" from the list
     }
 
     private int getDrawableId(String name) {
@@ -86,45 +116,115 @@ public class AddNewActivityActivity extends AppCompatActivity implements Navigat
     }
 
     private void loadExistingActivities() {
-        existingActivities = new ArrayList<>();
+        if (isLoading) return;
+        isLoading = true;
 
+        if (childId == null || childId.isEmpty() || parentId == null || parentId.isEmpty()) {
+            existingActivities = new ArrayList<>();
+            displayCurrentActivities();
+            isLoading = false;
+            return;
+        }
+
+        loadFromSharedPreferences();
+
+        db.collection("activities")
+                .whereEqualTo("childId", childId)
+                .whereEqualTo("parentId", parentId)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<ActivityItem> loadedActivities = new ArrayList<>();
+                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                        String activityName = doc.getString("activityName");
+                        if (activityName == null || activityName.isEmpty()) continue;
+                        ActivityItem item = findActivityItemByName(activityName);
+                        item.docId = doc.getId();
+                        Long order = doc.getLong("order");
+                        if (order != null) {
+                            item.order = order.intValue();
+                        }
+                        loadedActivities.add(item);
+                    }
+
+                    loadedActivities.sort((a, b) -> {
+                        if (a.order != 0 || b.order != 0) {
+                            return Integer.compare(a.order, b.order);
+                        }
+                        return a.name.compareTo(b.name);
+                    });
+
+                    existingActivities = loadedActivities;
+                    saveActivitiesLocally();
+                    displayCurrentActivities();
+                    isLoading = false;
+                })
+                .addOnFailureListener(e -> {
+                    isLoading = false;
+                    displayCurrentActivities();
+                });
+    }
+
+    private void loadFromSharedPreferences() {
         String savedActivities = getSharedPreferences("RoutinePrefs", MODE_PRIVATE)
-                .getString("activities", "");
+                .getString(getActivityPrefKey(), "");
 
         if (!savedActivities.isEmpty()) {
+            existingActivities = new ArrayList<>();
             String[] activities = savedActivities.split(",");
             for (String act : activities) {
-                for (ActivityItem item : allAvailableActivities) {
-                    if (item.name.equals(act)) {
-                        existingActivities.add(item);
-                        break;
-                    }
+                if (act.trim().isEmpty()) continue;
+                ActivityItem item = findActivityItemByName(act.trim());
+                if (item != null) {
+                    existingActivities.add(item);
                 }
             }
+            displayCurrentActivities();
+        } else {
+            existingActivities = new ArrayList<>();
+            displayCurrentActivities();
+        }
+    }
+
+    private ActivityItem findActivityItemByName(String name) {
+        for (ActivityItem item : allAvailableActivities) {
+            if (item.name.equals(name)) {
+                return new ActivityItem(item.name, item.iconRes);
+            }
+        }
+        return new ActivityItem(name, 0);
+    }
+
+    private void saveActivitiesLocally() {
+        StringBuilder sb = new StringBuilder();
+        for (ActivityItem activity : existingActivities) {
+            if (sb.length() > 0) sb.append(",");
+            sb.append(activity.name);
         }
 
-        if (existingActivities.isEmpty()) {
-            existingActivities.add(new ActivityItem("Brush Teeth", getDrawableId("brush")));
-            existingActivities.add(new ActivityItem("Eat Foods", getDrawableId("foods")));
-            existingActivities.add(new ActivityItem("Wash Hands", getDrawableId("hands")));
-            existingActivities.add(new ActivityItem("Sleep", getDrawableId("sleep")));
-            saveActivities();
-        }
+        String key = (childId != null && !childId.isEmpty()) ? "activities_" + childId : "activities";
+        getSharedPreferences("RoutinePrefs", MODE_PRIVATE)
+                .edit()
+                .putString(key, sb.toString())
+                .apply();
 
-        displayCurrentActivities();
+        sendBroadcast(new Intent("ACTIVITIES_UPDATED"));
     }
 
     private void displayCurrentActivities() {
         activityListContainer.removeAllViews();
 
-        if (existingActivities.isEmpty()) {
+        if (existingActivities == null || existingActivities.isEmpty()) {
             TextView emptyView = new TextView(this);
             emptyView.setText("No activities added yet.\nTap + to add activities.");
             emptyView.setTextSize(14);
-            emptyView.setTextColor(getColor(R.color.light_brown));
+            emptyView.setTextColor(ContextCompat.getColor(this, R.color.light_brown));
             emptyView.setPadding(16, 32, 16, 32);
             emptyView.setGravity(android.view.Gravity.CENTER);
             activityListContainer.addView(emptyView);
+
+            if (tvCurrentActivities != null) {
+                tvCurrentActivities.setText("Current Activities (0)");
+            }
             return;
         }
 
@@ -140,7 +240,6 @@ public class AddNewActivityActivity extends AppCompatActivity implements Navigat
             }
             tvName.setText(activity.name);
 
-            // UPDATED: Confirmation dialog for removing activity
             btnRemove.setOnClickListener(v -> {
                 showRemoveConfirmationDialog(activity);
             });
@@ -153,42 +252,61 @@ public class AddNewActivityActivity extends AppCompatActivity implements Navigat
         }
     }
 
-    // NEW: Remove confirmation dialog
-    private void showRemoveConfirmationDialog(ActivityItem activity) {
-        new AlertDialog.Builder(this)
-                .setTitle("Remove Activity")
-                .setMessage("Are you sure you want to remove \"" + activity.name + "\"?\n\nThis will remove it from the daily routine list.")
-                .setPositiveButton("YES, REMOVE", (dialog, which) -> {
-                    existingActivities.remove(activity);
-                    displayCurrentActivities();
-                    saveActivities();
-                    Toast.makeText(this, "Removed: " + activity.name, Toast.LENGTH_SHORT).show();
-                })
-                .setNegativeButton("CANCEL", null)
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .show();
+    private void showAddActivityDialog() {
+        try {
+            View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_activity, null);
+
+            LinearLayout activitiesGrid = dialogView.findViewById(R.id.activitiesGrid);
+
+            if (activitiesGrid == null) {
+                Toast.makeText(this, "Error: activitiesGrid not found", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Refresh the available activities list before showing
+            refreshAvailableActivities(activitiesGrid);
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setView(dialogView);
+            builder.setPositiveButton("Close", (dialog, which) -> {
+                dialog.dismiss();
+                addDialog = null;
+            });
+
+            addDialog = builder.create();
+            addDialog.show();
+
+            // Change "Close" button color based on theme
+            Button closeButton = addDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            if (closeButton != null) {
+                closeButton.setTextColor(ContextCompat.getColor(this, R.color.text_dark));
+                closeButton.setTypeface(null, android.graphics.Typeface.BOLD);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
 
-    private void showAddActivityDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_activity, null);
-
-        LinearLayout activitiesGrid = dialogView.findViewById(R.id.activitiesGrid);
-
-        if (activitiesGrid == null) {
-            Toast.makeText(this, "Error loading dialog", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
+    /**
+     * Refresh the available activities in the dialog grid
+     */
+    private void refreshAvailableActivities(LinearLayout activitiesGrid) {
         activitiesGrid.removeAllViews();
+
+        // Reload existing activities first to get latest data
+        loadExistingActivities();
 
         List<ActivityItem> availableToAdd = new ArrayList<>();
         for (ActivityItem item : allAvailableActivities) {
             boolean alreadyExists = false;
-            for (ActivityItem existing : existingActivities) {
-                if (existing.name.equals(item.name)) {
-                    alreadyExists = true;
-                    break;
+            if (existingActivities != null) {
+                for (ActivityItem existing : existingActivities) {
+                    if (existing.name.equals(item.name)) {
+                        alreadyExists = true;
+                        break;
+                    }
                 }
             }
             if (!alreadyExists) {
@@ -197,7 +315,13 @@ public class AddNewActivityActivity extends AppCompatActivity implements Navigat
         }
 
         if (availableToAdd.isEmpty()) {
-            Toast.makeText(this, "All activities are already added!", Toast.LENGTH_SHORT).show();
+            TextView emptyView = new TextView(this);
+            emptyView.setText("All activities are already added! ✅");
+            emptyView.setTextSize(16);
+            emptyView.setTextColor(ContextCompat.getColor(this, R.color.soft_blue));
+            emptyView.setPadding(16, 32, 16, 32);
+            emptyView.setGravity(android.view.Gravity.CENTER);
+            activitiesGrid.addView(emptyView);
             return;
         }
 
@@ -209,7 +333,7 @@ public class AddNewActivityActivity extends AppCompatActivity implements Navigat
             params.setMargins(0, 0, 0, 16);
             card.setLayoutParams(params);
             card.setRadius(20);
-            card.setCardBackgroundColor(getColor(R.color.white));
+            card.setCardBackgroundColor(ContextCompat.getColor(this, R.color.white));
             card.setElevation(4);
             card.setClickable(true);
 
@@ -218,7 +342,6 @@ public class AddNewActivityActivity extends AppCompatActivity implements Navigat
             innerLayout.setPadding(24, 24, 24, 24);
             innerLayout.setGravity(android.view.Gravity.CENTER_VERTICAL);
 
-            // BIGGER ICON
             ImageView iconImage = new ImageView(this);
             if (activity.iconRes != 0) {
                 iconImage.setImageResource(activity.iconRes);
@@ -227,64 +350,191 @@ public class AddNewActivityActivity extends AppCompatActivity implements Navigat
             iconImage.setPadding(0, 0, 20, 0);
             iconImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
 
-            // BIGGER TEXT
             TextView nameText = new TextView(this);
             nameText.setText(activity.name);
             nameText.setTextSize(18);
-            nameText.setTextColor(getColor(R.color.text_dark));
+            nameText.setTextColor(ContextCompat.getColor(this, R.color.text_dark));
             nameText.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
 
             TextView arrowText = new TextView(this);
             arrowText.setText("+");
             arrowText.setTextSize(32);
-            arrowText.setTextColor(getColor(R.color.soft_blue));
+            arrowText.setTextColor(ContextCompat.getColor(this, R.color.soft_blue));
 
             innerLayout.addView(iconImage);
             innerLayout.addView(nameText);
             innerLayout.addView(arrowText);
             card.addView(innerLayout);
 
-            // UPDATED: Confirmation dialog for adding activity
             card.setOnClickListener(v -> {
                 showAddConfirmationDialog(activity);
             });
 
             activitiesGrid.addView(card);
         }
-
-        builder.setView(dialogView);
-        builder.setPositiveButton("Close", null);
-        builder.show();
     }
 
-    // NEW: Add confirmation dialog
     private void showAddConfirmationDialog(ActivityItem activity) {
-        new AlertDialog.Builder(this)
-                .setTitle("Add Activity")
-                .setMessage("Are you sure you want to add \"" + activity.name + "\" to the routine list?")
-                .setPositiveButton("YES, ADD", (dialog, which) -> {
-                    existingActivities.add(activity);
-                    displayCurrentActivities();
-                    saveActivities();
-                    Toast.makeText(this, "Added: " + activity.name, Toast.LENGTH_SHORT).show();
-                })
-                .setNegativeButton("CANCEL", null)
-                .setIcon(android.R.drawable.ic_dialog_info)
-                .show();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Add Activity");
+        builder.setMessage("Are you sure you want to add \"" + activity.name + "\" to the routine list?");
+        builder.setPositiveButton("YES, ADD", (dialog, which) -> {
+            if (childId != null && !childId.isEmpty() && parentId != null && !parentId.isEmpty()) {
+                addActivityToFirestore(activity);
+            } else {
+                existingActivities.add(activity);
+                displayCurrentActivities();
+                saveActivitiesLocally();
+                Toast.makeText(this, "Added: " + activity.name, Toast.LENGTH_SHORT).show();
+            }
+
+            // Refresh the add dialog if it's still open
+            refreshAddDialog();
+        });
+        builder.setNegativeButton("CANCEL", (dialog, which) -> {});
+        builder.setIcon(android.R.drawable.ic_dialog_info);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+
+        if (positiveButton != null) {
+            positiveButton.setTextColor(ContextCompat.getColor(this, R.color.text_dark));
+            positiveButton.setTypeface(null, android.graphics.Typeface.BOLD);
+        }
+
+        if (negativeButton != null) {
+            negativeButton.setTextColor(ContextCompat.getColor(this, R.color.text_dark));
+            negativeButton.setTypeface(null, android.graphics.Typeface.BOLD);
+        }
     }
 
-    private void saveActivities() {
-        StringBuilder sb = new StringBuilder();
-        for (ActivityItem activity : existingActivities) {
-            if (sb.length() > 0) sb.append(",");
-            sb.append(activity.name);
+    /**
+     * Refresh the add activity dialog content without closing it
+     */
+    private void refreshAddDialog() {
+        if (addDialog != null && addDialog.isShowing()) {
+            // Get the dialog's content view
+            View dialogView = addDialog.getWindow().getDecorView().findViewById(android.R.id.content);
+            if (dialogView != null) {
+                // Find the activitiesGrid inside the dialog
+                LinearLayout activitiesGrid = dialogView.findViewById(R.id.activitiesGrid);
+                if (activitiesGrid != null) {
+                    // Refresh the grid
+                    refreshAvailableActivities(activitiesGrid);
+                }
+            }
         }
-        getSharedPreferences("RoutinePrefs", MODE_PRIVATE)
-                .edit()
-                .putString("activities", sb.toString())
-                .apply();
+    }
 
-        sendBroadcast(new Intent("ACTIVITIES_UPDATED"));
+    private void addActivityToFirestore(ActivityItem activity) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("activityName", activity.name);
+        data.put("childId", childId);
+        data.put("parentId", parentId);
+        data.put("order", existingActivities != null ? existingActivities.size() + 1 : 1);
+        data.put("createdAt", FieldValue.serverTimestamp());
+
+        db.collection("activities")
+                .add(data)
+                .addOnSuccessListener(documentReference -> {
+                    activity.docId = documentReference.getId();
+                    if (existingActivities == null) {
+                        existingActivities = new ArrayList<>();
+                    }
+                    existingActivities.add(activity);
+
+                    updateChildActivitiesArray(activity.name);
+
+                    saveActivitiesLocally();
+                    displayCurrentActivities();
+                    Toast.makeText(this, "✅ Added: " + activity.name, Toast.LENGTH_SHORT).show();
+
+                    // Refresh the add dialog after successful addition
+                    refreshAddDialog();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Unable to add activity. Try again.", Toast.LENGTH_LONG).show();
+                    e.printStackTrace();
+                });
+    }
+
+    private void updateChildActivitiesArray(String activityName) {
+        db.collection("children").document(childId)
+                .update("activities", FieldValue.arrayUnion(activityName))
+                .addOnSuccessListener(aVoid -> {})
+                .addOnFailureListener(e -> {
+                    db.collection("children").document(childId)
+                            .update("activities", FieldValue.arrayUnion(activityName));
+                });
+    }
+
+    private void removeActivityFromChildArray(String activityName) {
+        db.collection("children").document(childId)
+                .update("activities", FieldValue.arrayRemove(activityName))
+                .addOnSuccessListener(aVoid -> {})
+                .addOnFailureListener(e -> {});
+    }
+
+    private void showRemoveConfirmationDialog(ActivityItem activity) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Remove Activity");
+        builder.setMessage("Are you sure you want to remove \"" + activity.name + "\"?\n\nThis will remove it from the daily routine list.");
+        builder.setPositiveButton("YES, REMOVE", (dialog, which) -> {
+            if (activity.docId != null && !activity.docId.isEmpty()) {
+                removeActivityFromFirestore(activity);
+            } else {
+                existingActivities.remove(activity);
+                removeActivityFromChildArray(activity.name);
+                displayCurrentActivities();
+                saveActivitiesLocally();
+                Toast.makeText(this, "Removed: " + activity.name, Toast.LENGTH_SHORT).show();
+            }
+        });
+        builder.setNegativeButton("CANCEL", (dialog, which) -> {});
+        builder.setIcon(android.R.drawable.ic_dialog_alert);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+
+        if (positiveButton != null) {
+            positiveButton.setTextColor(ContextCompat.getColor(this, R.color.text_dark));
+            positiveButton.setTypeface(null, android.graphics.Typeface.BOLD);
+        }
+
+        if (negativeButton != null) {
+            negativeButton.setTextColor(ContextCompat.getColor(this, R.color.text_dark));
+            negativeButton.setTypeface(null, android.graphics.Typeface.BOLD);
+        }
+    }
+
+    private void removeActivityFromFirestore(ActivityItem activity) {
+        db.collection("activities")
+                .document(activity.docId)
+                .delete()
+                .addOnSuccessListener(aVoid -> {
+                    existingActivities.remove(activity);
+                    removeActivityFromChildArray(activity.name);
+                    displayCurrentActivities();
+                    saveActivitiesLocally();
+                    Toast.makeText(this, "Removed: " + activity.name, Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Unable to remove activity. Try again.", Toast.LENGTH_LONG).show();
+                    e.printStackTrace();
+                });
+    }
+
+    private String getActivityPrefKey() {
+        if (childId != null && !childId.isEmpty()) {
+            return "activities_" + childId;
+        }
+        return "activities";
     }
 
     private void updateNavHeader() {
@@ -328,7 +578,6 @@ public class AddNewActivityActivity extends AppCompatActivity implements Navigat
                 .setTitle("Logout")
                 .setMessage("Are you sure you want to logout?")
                 .setPositiveButton("YES", (dialog, which) -> {
-                    // Navigate to GoodbyeActivity
                     Intent intent = new Intent(AddNewActivityActivity.this, GoodbyeActivity.class);
                     startActivity(intent);
                     finish();
@@ -349,6 +598,8 @@ public class AddNewActivityActivity extends AppCompatActivity implements Navigat
     static class ActivityItem {
         String name;
         int iconRes;
+        String docId;
+        int order = 0;
 
         ActivityItem(String name, int iconRes) {
             this.name = name;

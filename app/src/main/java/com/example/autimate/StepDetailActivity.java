@@ -39,7 +39,9 @@ public class StepDetailActivity extends AppCompatActivity {
     private List<String> videoList = new ArrayList<>();
     private int currentStep = 0;
     private SharedPreferences progressPrefs;
+    private SharedPreferences childPrefs;
     private String title;
+    private String childId;
 
     // TTS Variables
     private TextToSpeech textToSpeech;
@@ -51,6 +53,8 @@ public class StepDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_step_detail);
 
         progressPrefs = getSharedPreferences("ChildProgress", MODE_PRIVATE);
+        childPrefs = getSharedPreferences("ChildPrefs", MODE_PRIVATE);
+        childId = childPrefs.getString("childId", "default");
         title = getIntent().getStringExtra("task_title");
 
         String[] stepInstructions = getIntent().getStringArrayExtra("task_steps");
@@ -112,46 +116,26 @@ public class StepDetailActivity extends AppCompatActivity {
         });
 
         // TTS Speaker Button Click Listener
-        btnSpeak.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                speakCurrentStep();
-            }
-        });
+        btnSpeak.setOnClickListener(v -> speakCurrentStep());
 
-        // ==================== UPDATED FINISH BUTTON WITH DATE SAVING ====================
+        // ==================== UPDATED FINISH BUTTON WITH CHILD-SPECIFIC DATE SAVING ====================
         btnFinish.setOnClickListener(v -> {
 
-            int completed =
-                    progressPrefs.getInt(
-                            "completedRoutines",
-                            0);
+            int completed = progressPrefs.getInt("completedRoutines", 0);
+            progressPrefs.edit().putInt("completedRoutines", completed + 1).apply();
 
-            progressPrefs.edit()
-                    .putInt(
-                            "completedRoutines",
-                            completed + 1)
-                    .apply();
-
-            // IMPORTANT: Save today's date for calendar tracking
+            // Save today's date for calendar tracking with child-specific key
             saveCompletedDate();
 
-            // Add task progress to Reward system
+            // Add task progress to Reward system (uses childId internally)
             RewardActivity.addTaskProgress(
                     this,
                     title,
                     5
             );
 
-            Intent intent =
-                    new Intent(
-                            StepDetailActivity.this,
-                            WellDoneActivity.class);
-
-            intent.putExtra(
-                    "routine_title",
-                    title);
-
+            Intent intent = new Intent(StepDetailActivity.this, WellDoneActivity.class);
+            intent.putExtra("routine_title", title);
             startActivity(intent);
             finish();
 
@@ -159,22 +143,32 @@ public class StepDetailActivity extends AppCompatActivity {
         // ================================================================
     }
 
-    // NEW METHOD: Save today's date to completedDates
+    /**
+     * Save today's date to completedDates with child-specific key
+     */
     private void saveCompletedDate() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-M-d", Locale.getDefault());
         String today = sdf.format(new Date());
 
         SharedPreferences rewardPrefs = getSharedPreferences("RewardPrefs", MODE_PRIVATE);
-        String existingDates = rewardPrefs.getString("completedDates", "");
 
-        // Check if today already exists
+        // Use child-specific key for completed dates
+        String childKey = childId + "_";
+        String completedDatesKey = childKey + "completedDates";
+
+        String existingDates = rewardPrefs.getString(completedDatesKey, "");
+
+        // Check if today already exists for this child
         if (!existingDates.contains(today)) {
             String newDates = existingDates.isEmpty() ? today : existingDates + "," + today;
+            rewardPrefs.edit().putString(completedDatesKey, newDates).apply();
+
+            // Also update the legacy key for backward compatibility
             rewardPrefs.edit().putString("completedDates", newDates).apply();
 
             // Debug log
-            android.util.Log.d("StepDetail", "Date saved: " + today);
-            android.util.Log.d("StepDetail", "All dates: " + newDates);
+            android.util.Log.d("StepDetail", "Date saved for child " + childId + ": " + today);
+            android.util.Log.d("StepDetail", "All dates for child: " + newDates);
         }
     }
 

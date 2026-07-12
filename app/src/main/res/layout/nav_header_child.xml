@@ -15,13 +15,26 @@
         app:cardElevation="4dp"
         app:cardBackgroundColor="@color/white">
 
-        <TextView
-            android:id="@+id/headerProfileIcon"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="👧"
-            android:textSize="35sp"
-            android:gravity="center"/>
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/headerProfileImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/headerProfileIcon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="👧"
+                android:textSize="35sp"
+                android:gravity="center"/>
+
+        </FrameLayout>
 
     </androidx.cardview.widget.CardView>
 

@@ -1,12 +1,14 @@
 package com.example.autimate;
 
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.VideoView;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 public class WellDoneActivity extends AppCompatActivity {
@@ -14,6 +16,9 @@ public class WellDoneActivity extends AppCompatActivity {
     private VideoView welldoneVideo;
     private TextView tvTitle, tvMessage, tvPointsEarned;
     private Button btnViewReward, btnBackToHome;
+
+    // MediaPlayer for hooray sound
+    private MediaPlayer hoorayMediaPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +35,9 @@ public class WellDoneActivity extends AppCompatActivity {
         tvPointsEarned = findViewById(R.id.tvPointsEarned);
         btnViewReward = findViewById(R.id.btnViewReward);
         btnBackToHome = findViewById(R.id.btnBackToHome);
+
+        // Load and play hooray.mp3 sound
+        playHooraySound();
 
         // Load and play welldone.mp4
         loadWelldoneVideo();
@@ -58,6 +66,47 @@ public class WellDoneActivity extends AppCompatActivity {
                 finish();
             }
         });
+    }
+
+    private void playHooraySound() {
+        try {
+            int rawResourceId = getResources().getIdentifier("hooray", "raw", getPackageName());
+
+            if (rawResourceId != 0) {
+                hoorayMediaPlayer = MediaPlayer.create(this, rawResourceId);
+                if (hoorayMediaPlayer != null) {
+                    hoorayMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                        @Override
+                        public void onPrepared(MediaPlayer mp) {
+                            hoorayMediaPlayer.start();
+                        }
+                    });
+                    hoorayMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                        @Override
+                        public void onCompletion(MediaPlayer mp) {
+                            // Release resources after playing
+                            releaseHoorayMediaPlayer();
+                        }
+                    });
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void releaseHoorayMediaPlayer() {
+        if (hoorayMediaPlayer != null) {
+            try {
+                if (hoorayMediaPlayer.isPlaying()) {
+                    hoorayMediaPlayer.stop();
+                }
+                hoorayMediaPlayer.release();
+                hoorayMediaPlayer = null;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void loadWelldoneVideo() {
@@ -94,6 +143,8 @@ public class WellDoneActivity extends AppCompatActivity {
         if (welldoneVideo != null && welldoneVideo.isPlaying()) {
             welldoneVideo.pause();
         }
+        // Release media player on pause
+        releaseHoorayMediaPlayer();
     }
 
     @Override
@@ -110,5 +161,6 @@ public class WellDoneActivity extends AppCompatActivity {
         if (welldoneVideo != null) {
             welldoneVideo.stopPlayback();
         }
+        releaseHoorayMediaPlayer();
     }
 }

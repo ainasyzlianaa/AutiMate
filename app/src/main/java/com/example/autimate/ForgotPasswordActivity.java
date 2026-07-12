@@ -7,8 +7,11 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.firebase.auth.FirebaseAuth;
 
 public class ForgotPasswordActivity extends AppCompatActivity {
@@ -102,9 +105,24 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_reset_success, null);
 
         TextView tvEmail = dialogView.findViewById(R.id.tvEmail);
+        TextView tvResend = dialogView.findViewById(R.id.tvResend);
         Button btnOk = dialogView.findViewById(R.id.btnOk);
 
         tvEmail.setText(email);
+
+        // Resend option - resend the email
+        tvResend.setOnClickListener(v -> {
+            // Resend the reset email
+            String emailAddress = tvEmail.getText().toString();
+            mAuth.sendPasswordResetEmail(emailAddress)
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(this, "✅ Reset email resent to " + emailAddress, Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(this, "❌ Failed to resend. Please try again.", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        });
 
         builder.setView(dialogView);
         builder.setCancelable(false);

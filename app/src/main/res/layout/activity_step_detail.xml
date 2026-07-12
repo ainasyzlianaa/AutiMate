@@ -20,7 +20,8 @@
             android:layout_height="40dp"
             android:src="@drawable/ic_back"
             android:padding="8dp"
-            android:clickable="true"/>
+            android:clickable="true"
+            android:tint="@color/text_dark"/>
 
         <TextView
             android:id="@+id/taskTitle"
@@ -76,7 +77,8 @@
             android:padding="10dp"
             android:layout_marginEnd="8dp"
             android:clickable="true"
-            android:background="@drawable/arrow_circle_bg"/>
+            android:background="@drawable/arrow_circle_bg"
+            android:tint="@color/text_dark"/>
 
         <!-- Step Card -->
         <androidx.cardview.widget.CardView
@@ -136,7 +138,7 @@
                         android:textColor="@color/soft_blue"
                         android:layout_marginEnd="12dp"/>
 
-                    <!-- Speaker Icon NEXT to Step Number -->
+                    <!-- Speaker Icon - Stays BLUE -->
                     <ImageView
                         android:id="@+id/btnSpeak"
                         android:layout_width="32dp"
@@ -146,11 +148,12 @@
                         android:clickable="true"
                         android:focusable="true"
                         android:background="@drawable/speaker_circle_bg"
-                        android:contentDescription="Read aloud"/>
+                        android:contentDescription="Read aloud"
+                        android:tint="@color/soft_blue"/>
 
                 </LinearLayout>
 
-                <!-- Step Instruction -->
+                <!-- Step Instruction - Uses text_dark (black in light mode, white in dark mode) -->
                 <TextView
                     android:id="@+id/stepInstruction"
                     android:layout_width="wrap_content"
@@ -175,7 +178,8 @@
             android:padding="10dp"
             android:layout_marginStart="8dp"
             android:clickable="true"
-            android:background="@drawable/arrow_circle_bg"/>
+            android:background="@drawable/arrow_circle_bg"
+            android:tint="@color/text_dark"/>
 
     </LinearLayout>
 

@@ -4,11 +4,14 @@
     package="com.example.autimate">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- Add this if you want to use offline voices -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!-- Notification Permissions -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:allowBackup="true"
@@ -21,20 +24,36 @@
         android:theme="@style/Theme.AutiMate"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
-        <activity
-            android:name=".GoodbyeActivity"
-            android:exported="false" />
+
+        <!-- Boot Receiver -->
+        <receiver
+            android:name=".BootReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Routine Notification Receiver -->
+        <receiver
+            android:name=".RoutineNotificationReceiver"
+            android:enabled="true"
+            android:exported="true" />
+
         <!-- Splash Screen (Launcher) -->
         <activity
             android:name=".SplashActivity"
             android:exported="true"
-            android:theme="@style/Theme.AutiMate"> <!-- Changed from @style/Theme.AutiMate to this -->
+            android:theme="@style/Theme.AutiMate">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> <!-- Login Activities -->
+        </activity>
+
+        <!-- Login Activities -->
         <activity
             android:name=".MainActivity"
             android:exported="false" />
@@ -46,13 +65,17 @@
             android:exported="false" />
         <activity
             android:name=".ForgotPasswordActivity"
-            android:exported="false" /> <!-- Child Management -->
+            android:exported="false" />
+
+        <!-- Child Management -->
         <activity
             android:name=".ChildSelectionActivity"
             android:exported="false" />
         <activity
             android:name=".AddChildProfileActivity"
-            android:exported="false" /> <!-- Home Activities -->
+            android:exported="false" />
+
+        <!-- Home Activities -->
         <activity
             android:name=".ChildHomeActivity"
             android:exported="false" />
@@ -61,7 +84,9 @@
             android:exported="false" />
         <activity
             android:name=".AccountActivity"
-            android:exported="false" /> <!-- Routine Activities -->
+            android:exported="false" />
+
+        <!-- Routine Activities -->
         <activity
             android:name=".RoutineTimeActivity"
             android:exported="false" />
@@ -73,7 +98,9 @@
             android:exported="false" />
         <activity
             android:name=".AddNewActivityActivity"
-            android:exported="false" /> <!-- Game Activities -->
+            android:exported="false" />
+
+        <!-- Game Activities -->
         <activity
             android:name=".GameSelectionActivity"
             android:exported="false" />
@@ -82,7 +109,9 @@
             android:exported="false" />
         <activity
             android:name=".DragDropGameActivity"
-            android:exported="false" /> <!-- Reward & Progress -->
+            android:exported="false" />
+
+        <!-- Reward & Progress -->
         <activity
             android:name=".RewardActivity"
             android:exported="false" />
@@ -91,16 +120,21 @@
             android:exported="false" />
         <activity
             android:name=".ThemeCustomizationActivity"
-            android:exported="false" /> <!-- Completion Pages -->
+            android:exported="false" />
+
+        <!-- Completion Pages -->
         <activity
             android:name=".WellDoneActivity"
-            android:exported="false" /> <!-- Utility -->
-        <activity
-            android:name=".SmoothPageTransformer"
             android:exported="false" />
         <activity
             android:name=".GoodbyeActivity"
             android:exported="false" />
+
+        <!-- Utility -->
+        <activity
+            android:name=".SmoothPageTransformer"
+            android:exported="false" />
+
     </application>
 
 </manifest>

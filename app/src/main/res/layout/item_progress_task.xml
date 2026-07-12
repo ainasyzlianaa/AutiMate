@@ -3,24 +3,46 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="8dp"
+    android:paddingVertical="8dp"
     android:gravity="center_vertical">
 
+    <!-- Icon Background -->
+    <LinearLayout
+        android:id="@+id/taskIconBg"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:background="@drawable/task_icon_bg_blue"
+        android:gravity="center"
+        android:layout_marginEnd="12dp">
+
+        <ImageView
+            android:id="@+id/ivTaskIcon"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_task_icon"
+            android:scaleType="fitCenter"/>
+
+    </LinearLayout>
+
+    <!-- Task Name -->
     <TextView
         android:id="@+id/tvTaskName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="Brush Teeth"
-        android:textSize="14sp"
-        android:textColor="@color/text_dark"/>
+        android:textSize="15sp"
+        android:textColor="@color/text_dark"
+        android:fontFamily="sans-serif-medium"/>
 
+    <!-- Status -->
     <TextView
         android:id="@+id/tvStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="✓ Completed"
-        android:textSize="12sp"
-        android:textColor="@color/soft_blue"/>
+        android:text="Completed"
+        android:textSize="13sp"
+        android:textColor="@color/soft_blue"
+        android:fontFamily="sans-serif-medium"/>
 
 </LinearLayout>

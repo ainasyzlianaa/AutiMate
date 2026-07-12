@@ -12,60 +12,82 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/cream"
-            app:title="Drag and Drop Game"
-            app:titleTextColor="@color/text_dark"
-            app:navigationIcon="@drawable/ic_menu"
-            app:navigationIconTint="@color/brown"/>
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Score -->
+            <!-- Header - Same style as Mix & Match -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:paddingBottom="16dp">
+                android:padding="16dp"
+                android:gravity="center_vertical">
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Drag and Drop Game"
+                    android:text="Drag &amp; Drop Game"
                     android:textSize="22sp"
                     android:textStyle="bold"
                     android:textColor="@color/text_dark"
                     android:gravity="center"/>
 
+            </LinearLayout>
+
+            <!-- Score Panel - Same style as Mix & Match -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:background="@color/beige">
+
                 <TextView
                     android:id="@+id/tvScore"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:text="Score: 0"
-                    android:textSize="18sp"
+                    android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="@color/soft_blue"/>
 
+                <TextView
+                    android:id="@+id/tvMatches"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Matches: 0/8"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/khaki"
+                    android:gravity="center"/>
+
+                <Button
+                    android:id="@+id/btnReset"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="Reset"
+                    android:textSize="12sp"
+                    android:textColor="@color/white"
+                    android:backgroundTint="@color/soft_blue"/>
+
             </LinearLayout>
 
-            <!-- Message -->
+            <!-- Game Message -->
             <TextView
                 android:id="@+id/tvMessage"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Drag the foods into the correct basket!"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 android:textColor="@color/light_brown"
-                android:gravity="center"
-                android:paddingBottom="20dp"/>
+                android:layout_gravity="center"
+                android:layout_margin="16dp"/>
 
             <!-- Baskets Section -->
             <TextView
@@ -280,20 +302,6 @@
                 </HorizontalScrollView>
 
             </FrameLayout>
-
-            <!-- Reset Button -->
-            <Button
-                android:id="@+id/btnReset"
-                android:layout_width="200dp"
-                android:layout_height="50dp"
-                android:text="RESET GAME"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="@color/white"
-                android:backgroundTint="@color/khaki"
-                android:layout_gravity="center"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"/>
 
         </LinearLayout>
 

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
@@ -24,12 +25,14 @@ public class GameSelectionActivity extends AppCompatActivity {
         tvTitle = findViewById(R.id.tvTitle);
         tvSubtitle = findViewById(R.id.tvSubtitle);
 
-        // Set texts
+        // Set texts with proper colors for dark mode
         if (tvTitle != null) {
             tvTitle.setText("Let's Play!");
+            tvTitle.setTextColor(getColor(R.color.text_dark)); // White in dark mode
         }
         if (tvSubtitle != null) {
             tvSubtitle.setText("Choose your favourite game");
+            tvSubtitle.setTextColor(getColor(R.color.light_brown)); // Light brown
         }
 
         // Mix & Match Game Card Click

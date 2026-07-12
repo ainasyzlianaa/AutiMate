@@ -3,30 +3,23 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="24dp"
-    android:background="@color/cream">
+    android:padding="16dp"
+    android:background="@color/white">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Add New Activity"
-        android:textSize="24sp"
+        android:text="Select Activity to Add"
+        android:textSize="18sp"
         android:textStyle="bold"
         android:textColor="@color/text_dark"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="16dp"
         android:layout_gravity="center"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Select an activity to add:"
-        android:textSize="14sp"
-        android:textColor="@color/light_brown"
-        android:layout_marginBottom="20dp"/>
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="500dp">
+        android:layout_height="wrap_content"
+        android:maxHeight="400dp">
 
         <LinearLayout
             android:id="@+id/activitiesGrid"

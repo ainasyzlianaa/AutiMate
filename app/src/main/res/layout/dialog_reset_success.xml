@@ -50,7 +50,28 @@
             android:textColor="@color/text_dark"
             android:textAlignment="center"
             android:layout_marginTop="4dp"
-            android:layout_marginBottom="24dp" />
+            android:layout_marginBottom="16dp" />
+
+        <!-- Divider -->
+        <View
+            android:layout_width="80dp"
+            android:layout_height="1dp"
+            android:background="@color/divider"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Resend Link -->
+        <TextView
+            android:id="@+id/tvResend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🔄 Didn't receive email? Tap to resend"
+            android:textSize="13sp"
+            android:textColor="@color/soft_blue"
+            android:textAlignment="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="8dp"
+            android:layout_marginBottom="16dp" />
 
         <Button
             android:id="@+id/btnOk"

@@ -12,6 +12,7 @@
 
     <!-- Light Mode Accents -->
     <color name="soft_blue">#4A9BD9</color>
+    <color name="soft_pink">#E88FAC</color>
     <color name="khaki">#C4A882</color>
     <color name="divider">#D4C5B0</color>
 
@@ -20,10 +21,10 @@
     <color name="card_game_bg">#DFFADF</color>
     <color name="card_reward_bg">#EDE0FF</color>
 
-    <!-- FIXED WHITE - Same in both light and dark mode -->
+    <!-- Fixed Colors -->
     <color name="fixed_white">#FFFFFF</color>
     <color name="green">#4CAF50</color>
-    <color name="yellow">#FFC107</color>
+    <color name="yellow">#E6CCA1</color>
     <color name="orange">#FF9800</color>
 
     <!-- Calendar Colors -->
@@ -32,4 +33,11 @@
     <color name="calendar_normal">#E0E0E0</color>
     <color name="calendar_empty">#F5F5F5</color>
     <color name="calendar_today">#4A9BD9</color>
+
+    <!-- Pink Variations -->
+    <color name="pink_light">#FFE4EC</color>
+    <color name="pink_medium">#F8A4B8</color>
+    <color name="pink_dark">#D4728A</color>
+    <color name="pink_hot">#FF69B4</color>
+    <color name="pink_pale">#FADADD</color>
 </resources>

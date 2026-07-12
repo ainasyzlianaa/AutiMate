@@ -17,6 +17,7 @@
 
     <!-- Dark Mode Accents -->
     <color name="soft_blue">#5BA3E3</color>
+    <color name="soft_pink">#D4728A</color>
     <color name="khaki">#D4A84A</color>
     <color name="divider">#4A3F38</color>
 

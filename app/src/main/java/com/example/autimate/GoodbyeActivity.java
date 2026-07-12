@@ -2,42 +2,54 @@ package com.example.autimate;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.VideoView;
+
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 
 public class GoodbyeActivity extends AppCompatActivity {
 
     private VideoView goodbyeVideo;
     private TextView tvGoodbyeMessage, tvGoodbyeSubtitle;
+    private MediaPlayer mediaPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_goodbye);
 
-        // Initialize views
         goodbyeVideo = findViewById(R.id.goodbyeVideo);
         tvGoodbyeMessage = findViewById(R.id.tvGoodbyeMessage);
         tvGoodbyeSubtitle = findViewById(R.id.tvGoodbyeSubtitle);
 
-        // Load and play goodbye animation
         loadGoodbyeVideo();
+        playGoodbyeSound();
 
-        // Set messages
-        tvGoodbyeMessage.setText("See you again! 👋");
+        tvGoodbyeMessage.setText("See you again!");
         tvGoodbyeSubtitle.setText("You've logged out successfully");
 
-        // After 3 seconds, navigate to MainActivity (Login screen)
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                // Clear all SharedPreferences
-                clearAllPreferences();
+                if (mediaPlayer != null) {
+                    if (mediaPlayer.isPlaying()) {
+                        mediaPlayer.stop();
+                    }
+                    mediaPlayer.release();
+                    mediaPlayer = null;
+                }
+
+                // Clear session preferences and reset theme to light mode
+                clearSessionPreferences();
+
+                // Reset theme to light mode before going to login
+                resetThemeToLight();
 
                 // Navigate to Login screen
                 Intent intent = new Intent(GoodbyeActivity.this, MainActivity.class);
@@ -45,12 +57,11 @@ public class GoodbyeActivity extends AppCompatActivity {
                 startActivity(intent);
                 finish();
             }
-        }, 3000); // 3 seconds delay
+        }, 3000);
     }
 
     private void loadGoodbyeVideo() {
         try {
-            // Load bye.mp4 from raw folder
             int rawResourceId = getResources().getIdentifier("bye", "raw", getPackageName());
 
             if (rawResourceId != 0) {
@@ -76,14 +87,51 @@ public class GoodbyeActivity extends AppCompatActivity {
         }
     }
 
-    private void clearAllPreferences() {
-        // Clear all SharedPreferences used in the app
-        getSharedPreferences("ChildPrefs", MODE_PRIVATE).edit().clear().apply();
-        getSharedPreferences("ChildProgress", MODE_PRIVATE).edit().clear().apply();
+    private void playGoodbyeSound() {
+        try {
+            int rawResourceId = getResources().getIdentifier("bye_sound", "raw", getPackageName());
+
+            if (rawResourceId != 0) {
+                mediaPlayer = MediaPlayer.create(this, rawResourceId);
+
+                if (mediaPlayer != null) {
+                    mediaPlayer.setVolume(1.0f, 1.0f);
+                    mediaPlayer.setLooping(false);
+                    mediaPlayer.start();
+
+                    mediaPlayer.setOnErrorListener((mp, what, extra) -> {
+                        mp.release();
+                        mediaPlayer = null;
+                        return true;
+                    });
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void clearSessionPreferences() {
+        // ONLY clear ParentPrefs - preserve all child data
         getSharedPreferences("ParentPrefs", MODE_PRIVATE).edit().clear().apply();
-        getSharedPreferences("RewardPrefs", MODE_PRIVATE).edit().clear().apply();
-        getSharedPreferences("RoutinePrefs", MODE_PRIVATE).edit().clear().apply();
-        getSharedPreferences("ThemePrefs", MODE_PRIVATE).edit().clear().apply();
+
+        // DO NOT clear these - they contain the child's progress data:
+        // - ChildPrefs (contains childId, childName, childAvatar)
+        // - RewardPrefs (contains all rewards and points)
+        // - RoutinePrefs (contains activities list)
+        // - ChildProgress (contains progress data)
+    }
+
+    /**
+     * Reset the app theme to light mode
+     */
+    private void resetThemeToLight() {
+        // Save theme preference as light
+        SharedPreferences themePrefs = getSharedPreferences("ThemePrefs", MODE_PRIVATE);
+        themePrefs.edit().putString("theme", "light").apply();
+
+        // Apply light mode
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
     }
 
     @Override
@@ -91,6 +139,9 @@ public class GoodbyeActivity extends AppCompatActivity {
         super.onPause();
         if (goodbyeVideo != null && goodbyeVideo.isPlaying()) {
             goodbyeVideo.pause();
+        }
+        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+            mediaPlayer.pause();
         }
     }
 
@@ -100,6 +151,9 @@ public class GoodbyeActivity extends AppCompatActivity {
         if (goodbyeVideo != null && !goodbyeVideo.isPlaying()) {
             goodbyeVideo.start();
         }
+        if (mediaPlayer != null && !mediaPlayer.isPlaying()) {
+            mediaPlayer.start();
+        }
     }
 
     @Override
@@ -107,6 +161,13 @@ public class GoodbyeActivity extends AppCompatActivity {
         super.onDestroy();
         if (goodbyeVideo != null) {
             goodbyeVideo.stopPlayback();
+        }
+        if (mediaPlayer != null) {
+            if (mediaPlayer.isPlaying()) {
+                mediaPlayer.stop();
+            }
+            mediaPlayer.release();
+            mediaPlayer = null;
         }
     }
 }

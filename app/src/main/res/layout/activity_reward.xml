@@ -23,7 +23,8 @@
                 android:layout_height="40dp"
                 android:src="@drawable/ic_back"
                 android:padding="8dp"
-                android:clickable="true" />
+                android:clickable="true"
+                android:tint="@color/text_dark" />
 
             <TextView
                 android:layout_width="0dp"
@@ -184,6 +185,7 @@
                         android:scaleType="fitCenter" />
 
                     <TextView
+                        android:id="@+id/tvBadgeNameFirstStar"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="First Star"
@@ -231,6 +233,7 @@
                         android:scaleType="fitCenter" />
 
                     <TextView
+                        android:id="@+id/tvBadgeNameOneRoll"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="One Roll"
@@ -278,6 +281,7 @@
                         android:scaleType="fitCenter" />
 
                     <TextView
+                        android:id="@+id/tvBadgeNameSuperHelper"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Super Helper"
@@ -325,6 +329,7 @@
                         android:scaleType="fitCenter" />
 
                     <TextView
+                        android:id="@+id/tvBadgeNameStarMaster"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Star Master"

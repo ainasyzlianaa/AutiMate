@@ -19,19 +19,19 @@
             android:id="@+id/tvDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Jan 1, 2024"
+            android:text="Jun 29, 2026"
             android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="@color/text_dark"
-            android:layout_marginBottom="8dp"/>
+            android:layout_marginBottom="4dp"/>
 
         <!-- Status -->
         <TextView
             android:id="@+id/tvStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="✅ All activities completed!"
-            android:textSize="16sp"
+            android:text="✅ All completed!"
+            android:textSize="15sp"
             android:textColor="@color/soft_blue"
             android:layout_marginBottom="16dp"/>
 
@@ -42,21 +42,25 @@
             android:background="@color/divider"
             android:layout_marginBottom="16dp"/>
 
-        <!-- Task Details -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Task Details"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:textColor="@color/text_dark"
-            android:layout_marginBottom="12dp"/>
-
+        <!-- Task List -->
         <LinearLayout
             android:id="@+id/taskDetailContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"/>
+            android:orientation="vertical"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Close Button -->
+        <Button
+            android:id="@+id/btnClose"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="CLOSE"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/soft_blue"
+            app:cornerRadius="24dp"/>
 
     </LinearLayout>
 

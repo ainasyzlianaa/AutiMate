@@ -10,7 +10,6 @@ import android.os.Vibrator;
 import android.view.DragEvent;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
@@ -18,9 +17,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.VideoView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,16 +30,18 @@ import java.util.Map;
 
 public class DragDropGameActivity extends AppCompatActivity {
 
-    private ImageView btnBack;
-    private TextView tvScore, tvMessage;
+    private TextView tvScore, tvMatches, tvMessage;
     private Button btnReset;
     private LinearLayout foodsContainer;
     private HorizontalScrollView scrollView;
     private CardView redBasket, yellowBasket, greenBasket, purpleBasket;
     private Vibrator vibrator;
     private MediaPlayer correctSound;
+    private MediaPlayer hooraySound;
 
     private int score = 0;
+    private int matches = 0;
+    private int totalFoods = 8;
     private List<View> foodCards = new ArrayList<>();
     private Map<String, String> foodColors = new HashMap<>();
 
@@ -73,8 +76,8 @@ public class DragDropGameActivity extends AppCompatActivity {
         }
 
         // Initialize views
-        btnBack = findViewById(R.id.btnBack);
         tvScore = findViewById(R.id.tvScore);
+        tvMatches = findViewById(R.id.tvMatches);
         tvMessage = findViewById(R.id.tvMessage);
         btnReset = findViewById(R.id.btnReset);
         foodsContainer = findViewById(R.id.foodsContainer);
@@ -95,16 +98,14 @@ public class DragDropGameActivity extends AppCompatActivity {
         if (btnReset != null) {
             btnReset.setOnClickListener(v -> resetGame());
         }
-
-        if (btnBack != null) {
-            btnBack.setOnClickListener(v -> finish());
-        }
     }
 
     private void setupFoodData() {
         for (int i = 0; i < foodNames.length; i++) {
             foodColors.put(foodNames[i], foodColorsList[i]);
         }
+        totalFoods = foodNames.length;
+        updateMatchesDisplay();
     }
 
     private void setupFoods() {
@@ -162,7 +163,8 @@ public class DragDropGameActivity extends AppCompatActivity {
 
             foodText.setText(foodName);
             foodText.setTextSize(16);
-            foodText.setTextColor(getColor(R.color.text_dark));
+            // FIX: Use black color for food names in both light and dark mode
+            foodText.setTextColor(Color.BLACK);
             foodText.setGravity(android.view.Gravity.CENTER);
             foodText.setTypeface(null, android.graphics.Typeface.BOLD);
             foodText.setMaxLines(2);
@@ -219,6 +221,7 @@ public class DragDropGameActivity extends AppCompatActivity {
                 Toast.LENGTH_SHORT
         ).show();
     }
+
     private void setupDropZones() {
         if (redBasket != null) setDropTarget(redBasket, "RED");
         if (yellowBasket != null) setDropTarget(yellowBasket, "YELLOW");
@@ -256,11 +259,19 @@ public class DragDropGameActivity extends AppCompatActivity {
                                 container.removeView(draggedView);
                                 foodCards.remove(draggedView);
                                 score += 10;
+                                matches++;
                                 updateScore();
+                                updateMatchesDisplay();
                                 showCorrectAnimation(dropZone);
                                 if (tvMessage != null) {
                                     tvMessage.setText("Great job! +10 points!");
                                     tvMessage.setTextColor(getColor(R.color.soft_blue));
+                                    new Handler().postDelayed(() -> {
+                                        if (tvMessage != null) {
+                                            tvMessage.setText("Drag the foods into the correct basket!");
+                                            tvMessage.setTextColor(getColor(R.color.light_brown));
+                                        }
+                                    }, 1500);
                                 }
 
                                 if (foodCards.isEmpty()) {
@@ -284,6 +295,12 @@ public class DragDropGameActivity extends AppCompatActivity {
                         if (tvMessage != null) {
                             tvMessage.setText("Oops! Wrong basket! Try again!");
                             tvMessage.setTextColor(getColor(R.color.brown));
+                            new Handler().postDelayed(() -> {
+                                if (tvMessage != null) {
+                                    tvMessage.setText("Drag the foods into the correct basket!");
+                                    tvMessage.setTextColor(getColor(R.color.light_brown));
+                                }
+                            }, 1500);
                         }
                     }
                     return true;
@@ -383,9 +400,17 @@ public class DragDropGameActivity extends AppCompatActivity {
         }
     }
 
+    private void updateMatchesDisplay() {
+        if (tvMatches != null) {
+            tvMatches.setText("Matches: " + matches + "/" + totalFoods);
+        }
+    }
+
     private void resetGame() {
         score = 0;
+        matches = 0;
         updateScore();
+        updateMatchesDisplay();
         if (tvMessage != null) {
             tvMessage.setText("Drag the foods into the correct basket!");
             tvMessage.setTextColor(getColor(R.color.light_brown));
@@ -395,6 +420,9 @@ public class DragDropGameActivity extends AppCompatActivity {
 
     private void showGameCompleteDialog() {
         playCorrectSound();
+
+        // Play hooray sound
+        playHooraySound();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_game_complete, null);
@@ -434,6 +462,32 @@ public class DragDropGameActivity extends AppCompatActivity {
                 dialog.dismiss();
                 finish();
             });
+        }
+    }
+
+    private void playHooraySound() {
+        try {
+            // Release any existing hooray sound
+            if (hooraySound != null) {
+                hooraySound.release();
+                hooraySound = null;
+            }
+
+            int rawResourceId = getResources().getIdentifier("hooray", "raw", getPackageName());
+            if (rawResourceId != 0) {
+                hooraySound = MediaPlayer.create(this, rawResourceId);
+                if (hooraySound != null) {
+                    hooraySound.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                        @Override
+                        public void onCompletion(MediaPlayer mp) {
+                            mp.release();
+                        }
+                    });
+                    hooraySound.start();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -478,6 +532,14 @@ public class DragDropGameActivity extends AppCompatActivity {
             try {
                 correctSound.release();
                 correctSound = null;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (hooraySound != null) {
+            try {
+                hooraySound.release();
+                hooraySound = null;
             } catch (Exception e) {
                 e.printStackTrace();
             }

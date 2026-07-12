@@ -3,53 +3,92 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/cream">
+    android:background="@drawable/bg_splash">
+
+    <!-- Dark overlay for better text readability -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#66000000" />
 
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:orientation="vertical"
         android:gravity="center"
-        android:layout_centerInParent="true">
+        android:padding="24dp">
 
+        <!-- Top spacer -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.15"/>
+
+        <!-- Logo - Smaller circle, bigger logo -->
         <androidx.cardview.widget.CardView
-            android:layout_width="150dp"
-            android:layout_height="150dp"
-            app:cardCornerRadius="75dp"
-            app:cardElevation="12dp"
-            app:cardBackgroundColor="@color/white"
+            android:layout_width="110dp"
+            android:layout_height="110dp"
+            app:cardCornerRadius="55dp"
+            app:cardElevation="16dp"
+            app:cardBackgroundColor="#FFFFFF"
             android:layout_marginBottom="16dp">
 
             <ImageView
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:layout_width="75dp"
+                android:layout_height="75dp"
                 android:src="@drawable/autimate_logo"
                 android:layout_gravity="center"/>
 
         </androidx.cardview.widget.CardView>
 
+        <!-- Title -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="AutiMate"
-            android:textColor="@color/brown"
+            android:textColor="@color/white"
             android:textStyle="bold"
             android:textSize="34sp"
-            android:layout_marginTop="10dp"/>
+            android:fontFamily="sans-serif-medium"
+            android:layout_marginTop="4dp"/>
 
-        <View
-            android:layout_width="50dp"
-            android:layout_height="2dp"
-            android:background="@color/soft_blue"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="8dp"/>
-
+        <!-- Quote -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Routine and Learning Companion"
-            android:textColor="@color/light_brown"
-            android:textSize="13sp"/>
+            android:text="Your Routine and Learning Companion"
+            android:textColor="#E8E0D8"
+            android:textSize="15sp"
+            android:fontFamily="sans-serif"
+            android:layout_marginTop="10dp"/>
+
+        <!-- Bottom section with loading -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.45"/>
+
+        <!-- Loading Text -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Loading your journey..."
+            android:textColor="#D4C5B0"
+            android:textSize="13sp"
+            android:fontFamily="sans-serif"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Progress Bar -->
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="200dp"
+            android:layout_height="4dp"
+            android:max="100"
+            android:progress="0"
+            android:progressTint="@color/soft_blue"
+            android:progressBackgroundTint="#4A3F38"
+            android:layout_marginBottom="30dp"/>
 
     </LinearLayout>
 

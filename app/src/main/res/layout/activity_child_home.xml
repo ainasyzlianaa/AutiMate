@@ -85,7 +85,7 @@
 
                         </LinearLayout>
 
-                        <!-- Video Container with WHITE background (FIXED for dark mode) -->
+                        <!-- Video Container with WHITE background -->
                         <FrameLayout
                             android:layout_width="130dp"
                             android:layout_height="160dp"
@@ -129,31 +129,36 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:orientation="vertical"
-                            android:gravity="center">
+                            android:gravity="center"
+                            android:layout_gravity="center">
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Today's Progress"
                                 android:textSize="12sp"
-                                android:textColor="@color/light_brown"/>
+                                android:textColor="@color/light_brown"
+                                android:layout_gravity="center"/>
 
                             <TextView
                                 android:id="@+id/progressStars"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="⭐⭐⭐⭐☆"
+                                android:text="☆☆☆☆☆"
                                 android:textSize="20sp"
-                                android:layout_marginTop="4dp"/>
+                                android:textColor="@android:color/black"
+                                android:layout_marginTop="4dp"
+                                android:layout_gravity="center"/>
 
                             <TextView
                                 android:id="@+id/tvProgressText"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="4 / 5 Activities"
+                                android:text="0 / 5 Activities"
                                 android:textSize="11sp"
                                 android:textColor="@color/light_brown"
-                                android:layout_marginTop="2dp"/>
+                                android:layout_marginTop="2dp"
+                                android:layout_gravity="center"/>
 
                         </LinearLayout>
 
@@ -169,32 +174,29 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:orientation="vertical"
-                            android:gravity="center">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Streak"
-                                android:textSize="12sp"
-                                android:textColor="@color/light_brown"/>
+                            android:gravity="center"
+                            android:layout_gravity="center">
 
                             <TextView
                                 android:id="@+id/tvStreak"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="🔥 7"
+                                android:text="Start today!"
                                 android:textSize="26sp"
                                 android:textStyle="bold"
                                 android:textColor="#FF6B35"
-                                android:layout_marginTop="4dp"/>
+                                android:layout_marginTop="4dp"
+                                android:layout_gravity="center"/>
 
                             <TextView
+                                android:id="@+id/tvStreakLabel"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Days in a row!"
+                                android:text="Do your routine now!"
                                 android:textSize="11sp"
                                 android:textColor="@color/light_brown"
-                                android:layout_marginTop="2dp"/>
+                                android:layout_marginTop="2dp"
+                                android:layout_gravity="center"/>
 
                         </LinearLayout>
 
@@ -214,7 +216,7 @@
                     android:layout_marginStart="24dp"
                     android:layout_marginEnd="24dp"/>
 
-                <!-- ===== ROUTINE TIME CARD (light blue tint) ===== -->
+                <!-- ===== ROUTINE TIME CARD ===== -->
                 <androidx.cardview.widget.CardView
                     android:id="@+id/cardRoutine"
                     android:layout_width="match_parent"
@@ -236,7 +238,6 @@
                         android:padding="16dp"
                         android:gravity="center_vertical">
 
-                        <!-- Icon image in white circle -->
                         <androidx.cardview.widget.CardView
                             android:layout_width="68dp"
                             android:layout_height="68dp"
@@ -253,7 +254,6 @@
 
                         </androidx.cardview.widget.CardView>
 
-                        <!-- Title + subtitle -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -279,7 +279,6 @@
 
                         </LinearLayout>
 
-                        <!-- Arrow button (blue circle) -->
                         <TextView
                             android:layout_width="42dp"
                             android:layout_height="42dp"
@@ -293,7 +292,7 @@
 
                 </androidx.cardview.widget.CardView>
 
-                <!-- ===== PLAY GAMES CARD (light green tint) ===== -->
+                <!-- ===== PLAY GAMES CARD ===== -->
                 <androidx.cardview.widget.CardView
                     android:id="@+id/cardGame"
                     android:layout_width="match_parent"
@@ -356,7 +355,6 @@
 
                         </LinearLayout>
 
-                        <!-- Arrow button (green circle) -->
                         <TextView
                             android:layout_width="42dp"
                             android:layout_height="42dp"
@@ -370,7 +368,7 @@
 
                 </androidx.cardview.widget.CardView>
 
-                <!-- ===== REWARDS CARD (light purple tint) ===== -->
+                <!-- ===== REWARDS CARD ===== -->
                 <androidx.cardview.widget.CardView
                     android:id="@+id/cardRewards"
                     android:layout_width="match_parent"
@@ -433,7 +431,6 @@
 
                         </LinearLayout>
 
-                        <!-- Arrow button (purple circle) -->
                         <TextView
                             android:layout_width="42dp"
                             android:layout_height="42dp"

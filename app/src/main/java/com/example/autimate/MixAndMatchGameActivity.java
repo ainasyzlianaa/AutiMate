@@ -34,6 +34,7 @@ public class MixAndMatchGameActivity extends AppCompatActivity {
 
     private Vibrator vibrator;
     private MediaPlayer correctSound;
+    private MediaPlayer hooraySound;
 
     private final String[] colorNames = {"RED", "BLUE", "GREEN", "YELLOW", "ORANGE", "PURPLE"};
     private final int[] colorValues = {0xFFFF5722, 0xFF2196F3, 0xFF4CAF50, 0xFFFFEB3B, 0xFFFF9800, 0xFF9C27B0};
@@ -351,6 +352,9 @@ public class MixAndMatchGameActivity extends AppCompatActivity {
         try {
             playCorrectSound();
 
+            // Play hooray sound
+            playHooraySound();
+
             Dialog dialog = new Dialog(this);
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
             dialog.setContentView(R.layout.dialog_game_complete);
@@ -391,6 +395,32 @@ public class MixAndMatchGameActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
             resetGame();
+        }
+    }
+
+    private void playHooraySound() {
+        try {
+            // Release any existing hooray sound
+            if (hooraySound != null) {
+                hooraySound.release();
+                hooraySound = null;
+            }
+
+            int rawResourceId = getResources().getIdentifier("hooray", "raw", getPackageName());
+            if (rawResourceId != 0) {
+                hooraySound = MediaPlayer.create(this, rawResourceId);
+                if (hooraySound != null) {
+                    hooraySound.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                        @Override
+                        public void onCompletion(MediaPlayer mp) {
+                            mp.release();
+                        }
+                    });
+                    hooraySound.start();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -435,6 +465,14 @@ public class MixAndMatchGameActivity extends AppCompatActivity {
             try {
                 correctSound.release();
                 correctSound = null;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (hooraySound != null) {
+            try {
+                hooraySound.release();
+                hooraySound = null;
             } catch (Exception e) {
                 e.printStackTrace();
             }

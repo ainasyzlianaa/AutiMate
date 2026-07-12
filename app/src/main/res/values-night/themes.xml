@@ -2,14 +2,46 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme for night mode -->
     <style name="Theme.AutiMate" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Primary Colors -->
         <item name="colorPrimary">@color/dark_bg</item>
         <item name="colorPrimaryVariant">@color/dark_bg_darker</item>
         <item name="colorOnPrimary">@color/dark_text_primary</item>
+
+        <!-- Secondary Colors -->
         <item name="colorSecondary">@color/soft_blue</item>
         <item name="colorSecondaryVariant">@color/khaki</item>
         <item name="colorOnSecondary">@color/white</item>
+
+        <!-- Status Bar -->
         <item name="android:statusBarColor">@color/dark_bg_darker</item>
+
+        <!-- Window Background -->
         <item name="android:windowBackground">@color/dark_bg</item>
+
+        <!-- Text Colors -->
         <item name="android:textColor">@color/dark_text_primary</item>
+
+        <!-- Alert Dialog Button Text Colors -->
+        <item name="android:buttonBarPositiveButtonStyle">@style/DarkPositiveButtonStyle</item>
+        <item name="android:buttonBarNegativeButtonStyle">@style/DarkNegativeButtonStyle</item>
+        <item name="android:buttonBarNeutralButtonStyle">@style/DarkNeutralButtonStyle</item>
+    </style>
+
+    <!-- Dark Mode Positive Button (YES, OK, ADD) -->
+    <style name="DarkPositiveButtonStyle" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
+        <item name="android:textColor">@color/soft_blue</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- Dark Mode Negative Button (NO, CANCEL) -->
+    <style name="DarkNegativeButtonStyle" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
+        <item name="android:textColor">@color/dark_text_primary</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- Dark Mode Neutral Button (Close) -->
+    <style name="DarkNeutralButtonStyle" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
+        <item name="android:textColor">@color/dark_text_primary</item>
+        <item name="android:textStyle">bold</item>
     </style>
 </resources>
