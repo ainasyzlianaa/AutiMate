@@ -37,12 +37,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Apply theme before setContentView
+        // Apply theme
         applyTheme();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Check notification permission for Android 13+
+        // Check notification permission
         checkNotificationPermission();
 
         // Create notification channels
@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Check and request notification permission for Android 13+
+     * Check and request notification permission
      */
     private void checkNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -101,9 +101,9 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 1) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission granted - notifications will work
+                // Permission granted
             } else {
-                // Permission denied - notifications won't work, but app will still function
+                // Permission denied
                 Toast.makeText(this, "Notification permission denied. You won't receive reminders.", Toast.LENGTH_SHORT).show();
             }
         }

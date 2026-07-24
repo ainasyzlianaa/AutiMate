@@ -313,7 +313,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         app:headerLayout="@layout/nav_header_parent"
-        app:menu="@menu/navigation_menu_parent"
+        app:menu="@menu/navigation_menu_child"
         app:itemTextColor="@color/text_dark"
         app:itemIconTint="@color/light_brown"
         android:background="@color/white"/>

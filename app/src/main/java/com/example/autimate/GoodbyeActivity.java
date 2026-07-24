@@ -112,14 +112,8 @@ public class GoodbyeActivity extends AppCompatActivity {
     }
 
     private void clearSessionPreferences() {
-        // ONLY clear ParentPrefs - preserve all child data
         getSharedPreferences("ParentPrefs", MODE_PRIVATE).edit().clear().apply();
 
-        // DO NOT clear these - they contain the child's progress data:
-        // - ChildPrefs (contains childId, childName, childAvatar)
-        // - RewardPrefs (contains all rewards and points)
-        // - RoutinePrefs (contains activities list)
-        // - ChildProgress (contains progress data)
     }
 
     /**

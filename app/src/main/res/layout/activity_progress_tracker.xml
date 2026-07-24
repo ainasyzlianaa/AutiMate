@@ -335,6 +335,7 @@
 
     </LinearLayout>
 
+    <!-- SIDEBAR NAVIGATION MENU -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/navView"
         android:layout_width="280dp"
@@ -344,6 +345,6 @@
         app:headerLayout="@layout/nav_header_child"
         app:itemIconTint="@color/light_brown"
         app:itemTextColor="@color/text_dark"
-        app:menu="@menu/navigation_menu_parent"/>
+        app:menu="@menu/navigation_menu_child"/>
 
 </androidx.drawerlayout.widget.DrawerLayout>

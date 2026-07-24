@@ -192,7 +192,6 @@ public class RoutineTimeActivity extends AppCompatActivity {
         return "activities";
     }
 
-    // ===================== UPDATED: Pack School Bag =====================
     private void openPackBag() {
         openStepDetail("Pack School Bag", new String[]{
                 "Pick your bag",
@@ -207,7 +206,6 @@ public class RoutineTimeActivity extends AppCompatActivity {
         });
     }
 
-    // ===================== UPDATED: Sleep =====================
     private void openSleep() {
         openStepDetail("Sleep", new String[]{
                 "Get ready for bed",
@@ -220,7 +218,6 @@ public class RoutineTimeActivity extends AppCompatActivity {
         });
     }
 
-    // ===================== OTHER ACTIVITIES (Unchanged) =====================
     private void openBrushTeeth() {
         openStepDetail("Brush Teeth", new String[]{
                 "Take a toothbrush",

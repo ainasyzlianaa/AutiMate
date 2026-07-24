@@ -98,7 +98,7 @@ public class RoutineNotificationReceiver extends BroadcastReceiver {
                 routineMessage = "Don't forget your afternoon routine! 🦷";
             }
         }
-        // Evening (8-10 PM) - UPDATED to 20:00-22:00
+        // Evening (8-10 PM)
         else if (hour >= 20 && hour < 22) {
             if (completedCount < activityList.size()) {
                 routineTitle = "🌙 Good Evening, " + childName + "!";

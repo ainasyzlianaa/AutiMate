@@ -126,11 +126,11 @@ public class RewardActivity extends AppCompatActivity {
         initViews();
         initializeBadges();
 
-        // Load from SharedPreferences instantly
+        // Load from SharedPreferences
         loadRewardData();
         updateUI();
 
-        // Then update from Firestore in background
+        // Update from Firestore
         loadDataFromFirestore();
 
         setupClickListeners();
@@ -520,7 +520,7 @@ public class RewardActivity extends AppCompatActivity {
         checkBadgeUnlocks(context, childId);
         saveToFirestore(context, childId);
 
-        // CHECK STREAK MILESTONE - Send notification if streak milestone reached
+        // Send notification if streak milestone reached
         StreakChecker.checkAndUpdateStreak(context);
     }
 

@@ -118,7 +118,6 @@ public class StepDetailActivity extends AppCompatActivity {
         // TTS Speaker Button Click Listener
         btnSpeak.setOnClickListener(v -> speakCurrentStep());
 
-        // ==================== UPDATED FINISH BUTTON WITH CHILD-SPECIFIC DATE SAVING ====================
         btnFinish.setOnClickListener(v -> {
 
             int completed = progressPrefs.getInt("completedRoutines", 0);
@@ -127,7 +126,7 @@ public class StepDetailActivity extends AppCompatActivity {
             // Save today's date for calendar tracking with child-specific key
             saveCompletedDate();
 
-            // Add task progress to Reward system (uses childId internally)
+            // Add task progress to Reward system
             RewardActivity.addTaskProgress(
                     this,
                     title,
@@ -140,7 +139,6 @@ public class StepDetailActivity extends AppCompatActivity {
             finish();
 
         });
-        // ================================================================
     }
 
     /**

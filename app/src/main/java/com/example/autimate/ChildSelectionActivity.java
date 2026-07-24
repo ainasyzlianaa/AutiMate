@@ -147,7 +147,7 @@ public class ChildSelectionActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Refresh the list when returning to this activity
+        // Refresh the list
         loadChildren();
     }
 
@@ -181,7 +181,7 @@ public class ChildSelectionActivity extends AppCompatActivity {
             ChildProfile child = children.get(position);
 
             if (child != null) {
-                // Set avatar (emoji or default)
+                // Set avatar
                 String avatar = child.avatar != null ? child.avatar : "👧";
                 holder.tvAvatar.setText(avatar);
 

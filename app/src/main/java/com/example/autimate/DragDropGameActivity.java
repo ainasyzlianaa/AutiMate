@@ -45,7 +45,7 @@ public class DragDropGameActivity extends AppCompatActivity {
     private List<View> foodCards = new ArrayList<>();
     private Map<String, String> foodColors = new HashMap<>();
 
-    // YOUR EXACT FOOD ITEMS
+    // Food Items
     private String[] foodNames = {"Apple", "Cherry", "Banana", "Cheese", "Grape", "Yam", "Pea", "Pear"};
     private String[] foodColorsList = {"RED", "RED", "YELLOW", "YELLOW", "PURPLE", "PURPLE", "GREEN", "GREEN"};
     private int[] foodImageIds = {
@@ -163,7 +163,6 @@ public class DragDropGameActivity extends AppCompatActivity {
 
             foodText.setText(foodName);
             foodText.setTextSize(16);
-            // FIX: Use black color for food names in both light and dark mode
             foodText.setTextColor(Color.BLACK);
             foodText.setGravity(android.view.Gravity.CENTER);
             foodText.setTypeface(null, android.graphics.Typeface.BOLD);
@@ -429,7 +428,6 @@ public class DragDropGameActivity extends AppCompatActivity {
 
         VideoView congratulationsVideo = dialogView.findViewById(R.id.congratulationsVideo);
 
-        // Load and play congratulations.mp4
         loadCongratulationsVideo(congratulationsVideo);
 
         TextView tvGameMessage = dialogView.findViewById(R.id.tvGameMessage);
@@ -467,7 +465,7 @@ public class DragDropGameActivity extends AppCompatActivity {
 
     private void playHooraySound() {
         try {
-            // Release any existing hooray sound
+            // Release hooray sound
             if (hooraySound != null) {
                 hooraySound.release();
                 hooraySound = null;
@@ -493,7 +491,6 @@ public class DragDropGameActivity extends AppCompatActivity {
 
     private void loadCongratulationsVideo(VideoView videoView) {
         try {
-            // Try to load congratulations.mp4 from raw folder
             int rawResourceId = getResources().getIdentifier("congratulations", "raw", getPackageName());
 
             if (rawResourceId != 0 && videoView != null) {

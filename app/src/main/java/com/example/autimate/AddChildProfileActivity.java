@@ -55,7 +55,7 @@ public class AddChildProfileActivity extends AppCompatActivity {
     private String selectedGender = "Male";
     private String selectedDateOfBirth = "";
 
-    // Array of all avatar cards for easy reset
+    // Array of all avatar cards
     private CardView[] allAvatars;
 
     // Lists for spinners
@@ -75,7 +75,7 @@ public class AddChildProfileActivity extends AppCompatActivity {
         userUsername = getIntent().getStringExtra("userUsername");
         userPassword = getIntent().getStringExtra("userPassword");
 
-        // If coming from selection page (no intent data), use default
+        // If coming from selection page, use default
         if (userEmail == null || userEmail.isEmpty()) {
             // Try to get from SharedPreferences
             SharedPreferences prefs = getSharedPreferences("ParentPrefs", MODE_PRIVATE);
@@ -85,12 +85,12 @@ public class AddChildProfileActivity extends AppCompatActivity {
             userUsername = "";
         }
 
-        // If still empty, try to get from FirebaseUser
+        // If still empty, get from FirebaseUser
         if (userEmail == null || userEmail.isEmpty()) {
             FirebaseUser currentUser = mAuth.getCurrentUser();
             if (currentUser != null) {
                 userEmail = currentUser.getEmail() != null ? currentUser.getEmail() : "";
-                // Try to get fullName from SharedPreferences
+                // Get fullName from SharedPreferences
                 SharedPreferences prefs = getSharedPreferences("ParentPrefs", MODE_PRIVATE);
                 userFullName = prefs.getString("parentName", "");
             }
@@ -377,7 +377,6 @@ public class AddChildProfileActivity extends AppCompatActivity {
     }
 
     private void saveParentAndChildToFirestore(String userId, String childName, String childAge) {
-        // 1. Check if parent exists and get data
         db.collection("parents").document(userId).get()
                 .addOnSuccessListener(documentSnapshot -> {
                     final String finalFullName;
@@ -403,7 +402,6 @@ public class AddChildProfileActivity extends AppCompatActivity {
                         finalEmail = userEmail;
                     }
 
-                    // 2. Save/Update Parent
                     Map<String, Object> parent = new HashMap<>();
                     parent.put("userId", userId);
                     parent.put("fullName", finalFullName);
@@ -413,7 +411,6 @@ public class AddChildProfileActivity extends AppCompatActivity {
                     db.collection("parents").document(userId)
                             .set(parent)
                             .addOnSuccessListener(aVoid -> {
-                                // ===== STEP 3: Save Child =====
                                 Map<String, Object> child = new HashMap<>();
                                 child.put("parentId", userId);
                                 child.put("parentName", finalFullName);
@@ -423,22 +420,17 @@ public class AddChildProfileActivity extends AppCompatActivity {
                                 child.put("avatar", selectedAvatar);
                                 child.put("dob", selectedDateOfBirth);
                                 child.put("createdAt", FieldValue.serverTimestamp());
-                                // IMPORTANT: New child starts with EMPTY activities array
                                 child.put("activities", new ArrayList<>());
 
                                 db.collection("children").add(child)
                                         .addOnSuccessListener(documentReference -> {
                                             String childId = documentReference.getId();
 
-                                            // ===== STEP 4: Add Child ID to Parent =====
                                             db.collection("parents").document(userId)
                                                     .update("children", FieldValue.arrayUnion(childId))
                                                     .addOnSuccessListener(aVoid2 -> {})
                                                     .addOnFailureListener(e -> {});
 
-                                            // ===== STEP 5: NO DEFAULT ACTIVITIES =====
-
-                                            // ===== STEP 6: Save to SharedPreferences =====
                                             SharedPreferences childPrefs = getSharedPreferences("ChildPrefs", MODE_PRIVATE);
                                             childPrefs.edit()
                                                     .putString("childId", childId)
@@ -453,7 +445,6 @@ public class AddChildProfileActivity extends AppCompatActivity {
                                                     .putString("parentEmail", finalEmail)
                                                     .apply();
 
-                                            // ===== STEP 7: Navigate to Child Selection =====
                                             progressBar.setVisibility(View.GONE);
                                             btnAddChild.setEnabled(true);
                                             btnAddChild.setText("NEXT");

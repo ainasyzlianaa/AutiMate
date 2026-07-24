@@ -23,6 +23,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.navigation.NavigationView;
 
 public class ThemeCustomizationActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -106,15 +107,44 @@ public class ThemeCustomizationActivity extends AppCompatActivity implements Nav
     private void updateNavHeader() {
         if (navigationView == null) return;
         View headerView = navigationView.getHeaderView(0);
-        TextView tvParentName = headerView.findViewById(R.id.tvParentName);
-        TextView tvParentEmail = headerView.findViewById(R.id.tvParentEmail);
+        TextView tvChildName = headerView.findViewById(R.id.tvChildName);
+        TextView tvChildStatus = headerView.findViewById(R.id.tvChildStatus);
+        ImageView headerProfileImage = headerView.findViewById(R.id.headerProfileImage);
+        TextView headerProfileIcon = headerView.findViewById(R.id.headerProfileIcon);
 
-        SharedPreferences prefs = getSharedPreferences("ParentPrefs", MODE_PRIVATE);
-        String parentName = prefs.getString("parentName", "Parent");
-        String parentEmail = prefs.getString("parentEmail", "");
+        SharedPreferences prefs = getSharedPreferences("ChildPrefs", MODE_PRIVATE);
+        String childName = prefs.getString("childName", "Child");
+        String childAvatar = prefs.getString("childAvatar", "👧");
 
-        if (tvParentName != null) tvParentName.setText(parentName);
-        if (tvParentEmail != null) tvParentEmail.setText(parentEmail);
+        if (tvChildName != null) {
+            tvChildName.setText(childName);
+        }
+
+        if (tvChildStatus != null) {
+            tvChildStatus.setText("● Active");
+        }
+
+        if (headerProfileImage != null && headerProfileIcon != null) {
+            if (childAvatar != null && (childAvatar.startsWith("content://") || childAvatar.startsWith("file://") ||
+                    childAvatar.startsWith("http://") || childAvatar.startsWith("https://"))) {
+                try {
+                    Glide.with(this)
+                            .load(childAvatar)
+                            .placeholder(R.drawable.circle_bg)
+                            .into(headerProfileImage);
+                    headerProfileImage.setVisibility(View.VISIBLE);
+                    headerProfileIcon.setVisibility(View.GONE);
+                } catch (Exception e) {
+                    headerProfileImage.setVisibility(View.GONE);
+                    headerProfileIcon.setVisibility(View.VISIBLE);
+                    headerProfileIcon.setText("👧");
+                }
+            } else {
+                headerProfileImage.setVisibility(View.GONE);
+                headerProfileIcon.setVisibility(View.VISIBLE);
+                headerProfileIcon.setText(childAvatar != null && !childAvatar.isEmpty() ? childAvatar : "👧");
+            }
+        }
     }
 
     @Override
@@ -129,8 +159,6 @@ public class ThemeCustomizationActivity extends AppCompatActivity implements Nav
             startActivity(new Intent(this, ProgressTrackerActivity.class));
         } else if (id == R.id.nav_add_activity) {
             startActivity(new Intent(this, AddNewActivityActivity.class));
-        } else if (id == R.id.nav_view_rewards) {
-            startActivity(new Intent(this, RewardActivity.class));
         } else if (id == R.id.nav_theme) {
             // Already here
         } else if (id == R.id.nav_logout) {
@@ -156,11 +184,9 @@ public class ThemeCustomizationActivity extends AppCompatActivity implements Nav
     }
 
     private void forceTextColors() {
-        // Always set dark mode text to white
         tvDarkTitle.setTextColor(Color.WHITE);
         tvDarkDesc.setTextColor(Color.parseColor("#D3D3D3"));
 
-        // Always set light mode text to dark
         tvLightTitle.setTextColor(ContextCompat.getColor(this, R.color.text_dark));
         tvLightDesc.setTextColor(ContextCompat.getColor(this, R.color.light_brown));
     }
@@ -181,7 +207,6 @@ public class ThemeCustomizationActivity extends AppCompatActivity implements Nav
         int borderWidth = (int) (2.5f * density);
         float cornerRadius = 16f * density;
 
-        // Selected card styling
         GradientDrawable selectedDrawable = new GradientDrawable();
         selectedDrawable.setShape(GradientDrawable.RECTANGLE);
         selectedDrawable.setCornerRadius(cornerRadius);
@@ -196,7 +221,6 @@ public class ThemeCustomizationActivity extends AppCompatActivity implements Nav
         selected.setBackground(selectedDrawable);
         selected.setCardElevation(8f);
 
-        // Unselected card styling
         GradientDrawable unselectedDrawable = new GradientDrawable();
         unselectedDrawable.setShape(GradientDrawable.RECTANGLE);
         unselectedDrawable.setCornerRadius(cornerRadius);
@@ -211,19 +235,15 @@ public class ThemeCustomizationActivity extends AppCompatActivity implements Nav
         unselected.setBackground(unselectedDrawable);
         unselected.setCardElevation(2f);
 
-        // Show/hide checkmarks
         lightCheckmark.setVisibility(selected == lightThemeCard ? View.VISIBLE : View.GONE);
         darkCheckmark.setVisibility(selected == darkThemeCard ? View.VISIBLE : View.GONE);
 
-        // Force text colors again after selection
         forceTextColors();
     }
 
     private void applyTheme() {
-        // Save theme preference
         themePrefs.edit().putString("theme", selectedTheme).apply();
 
-        // Apply theme using AppCompatDelegate
         if (selectedTheme.equals("dark")) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         } else {
@@ -232,7 +252,6 @@ public class ThemeCustomizationActivity extends AppCompatActivity implements Nav
 
         Toast.makeText(this, "✅ Theme applied successfully!", Toast.LENGTH_SHORT).show();
 
-        // Restart the app to apply theme changes
         new android.os.Handler().postDelayed(() -> {
             restartApp();
         }, 800);
@@ -258,7 +277,6 @@ public class ThemeCustomizationActivity extends AppCompatActivity implements Nav
     @Override
     protected void onResume() {
         super.onResume();
-        // Force text colors when activity resumes
         forceTextColors();
     }
 }

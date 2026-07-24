@@ -23,7 +23,7 @@ public class NotificationHelper {
     public static final int NOTIFICATION_ACHIEVEMENT = 1003;
 
     /**
-     * Create notification channels (call once in Application or MainActivity)
+     * Create notification channels
      */
     public static void createNotificationChannels(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

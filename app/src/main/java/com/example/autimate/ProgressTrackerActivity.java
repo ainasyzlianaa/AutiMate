@@ -10,19 +10,20 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
@@ -610,7 +611,6 @@ public class ProgressTrackerActivity extends AppCompatActivity implements Naviga
         AlertDialog dialog = builder.create();
         dialog.show();
 
-        // Fix: Change button colors based on theme
         Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
         Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
 
@@ -1130,6 +1130,7 @@ public class ProgressTrackerActivity extends AppCompatActivity implements Naviga
         if (navigationView == null) return;
         View headerView = navigationView.getHeaderView(0);
         TextView tvChildName = headerView.findViewById(R.id.tvChildName);
+        TextView tvChildStatus = headerView.findViewById(R.id.tvChildStatus);
         ImageView headerProfileImage = headerView.findViewById(R.id.headerProfileImage);
         TextView headerProfileIcon = headerView.findViewById(R.id.headerProfileIcon);
 
@@ -1137,7 +1138,14 @@ public class ProgressTrackerActivity extends AppCompatActivity implements Naviga
         String childName = prefs.getString("childName", "Child");
         String childAvatar = prefs.getString("childAvatar", "👧");
 
-        if (tvChildName != null) tvChildName.setText(childName);
+        if (tvChildName != null) {
+            tvChildName.setText(childName);
+        }
+
+        if (tvChildStatus != null) {
+            tvChildStatus.setText("● Active");
+        }
+
         if (headerProfileImage != null && headerProfileIcon != null) {
             if (childAvatar != null && (childAvatar.startsWith("content://") || childAvatar.startsWith("file://") || childAvatar.startsWith("http://") || childAvatar.startsWith("https://"))) {
                 try {
@@ -1173,12 +1181,10 @@ public class ProgressTrackerActivity extends AppCompatActivity implements Naviga
             // Already here
         } else if (id == R.id.nav_add_activity) {
             startActivity(new Intent(this, AddNewActivityActivity.class));
-        } else if (id == R.id.nav_view_rewards) {
-            startActivity(new Intent(this, RewardActivity.class));
         } else if (id == R.id.nav_theme) {
             startActivity(new Intent(this, ThemeCustomizationActivity.class));
         } else if (id == R.id.nav_logout) {
-            logout();
+            showLogoutDialog();
         }
 
         if (drawerLayout != null) {
@@ -1187,18 +1193,45 @@ public class ProgressTrackerActivity extends AppCompatActivity implements Naviga
         return true;
     }
 
-    private void logout() {
-        new AlertDialog.Builder(this)
-                .setTitle("Logout")
-                .setMessage("Are you sure you want to logout?")
-                .setPositiveButton("YES", (dialog, which) -> {
-                    Intent intent = new Intent(ProgressTrackerActivity.this, GoodbyeActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                    finish();
-                })
-                .setNegativeButton("CANCEL", null)
-                .show();
+    private void showLogoutDialog() {
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_logout, null);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(dialogView);
+        builder.setCancelable(true);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        Button btnCancel = dialogView.findViewById(R.id.btnCancel);
+        Button btnYes = dialogView.findViewById(R.id.btnYes);
+
+        int nightMode = AppCompatDelegate.getDefaultNightMode();
+        boolean isDarkMode = (nightMode == AppCompatDelegate.MODE_NIGHT_YES) ||
+                (nightMode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM &&
+                        (getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES);
+
+        if (isDarkMode) {
+            btnCancel.setTextColor(ContextCompat.getColor(this, R.color.white));
+            btnYes.setTextColor(ContextCompat.getColor(this, R.color.white));
+            btnCancel.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.dark_card_bg));
+            btnYes.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.soft_blue));
+        } else {
+            btnCancel.setTextColor(ContextCompat.getColor(this, android.R.color.black));
+            btnYes.setTextColor(ContextCompat.getColor(this, android.R.color.black));
+            btnCancel.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.khaki));
+            btnYes.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.soft_blue));
+        }
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        btnYes.setOnClickListener(v -> {
+            dialog.dismiss();
+            Intent intent = new Intent(ProgressTrackerActivity.this, GoodbyeActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+        });
     }
 
     @Override

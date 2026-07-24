@@ -6,7 +6,7 @@ public class User {
     public String email;
     public String role;
 
-    // EMPTY CONSTRUCTOR (REQUIRED for Firebase)
+    // REQUIRED for Firebase
     public User() {
     }
 

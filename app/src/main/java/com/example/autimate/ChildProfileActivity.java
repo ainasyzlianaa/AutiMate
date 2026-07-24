@@ -3,6 +3,7 @@ package com.example.autimate;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -27,6 +28,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -86,7 +88,7 @@ public class ChildProfileActivity extends AppCompatActivity implements Navigatio
             return;
         }
 
-        // Setup drawer first
+        // Setup drawer
         setupDrawer();
 
         initViews();
@@ -105,7 +107,6 @@ public class ChildProfileActivity extends AppCompatActivity implements Navigatio
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // Enable the home button (hamburger icon)
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
@@ -114,7 +115,6 @@ public class ChildProfileActivity extends AppCompatActivity implements Navigatio
         drawerLayout = findViewById(R.id.drawerLayout);
         navigationView = findViewById(R.id.navView);
 
-        // Create the toggle with the drawer layout and toolbar
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this,
                 drawerLayout,
@@ -123,12 +123,8 @@ public class ChildProfileActivity extends AppCompatActivity implements Navigatio
                 R.string.app_name
         );
 
-        // Set the toggle as the drawer listener
         drawerLayout.addDrawerListener(toggle);
-
-        // Sync the state to update the hamburger icon
         toggle.syncState();
-
         navigationView.setNavigationItemSelectedListener(this);
 
         updateNavHeader();
@@ -137,15 +133,44 @@ public class ChildProfileActivity extends AppCompatActivity implements Navigatio
     private void updateNavHeader() {
         if (navigationView == null) return;
         View headerView = navigationView.getHeaderView(0);
-        TextView tvParentName = headerView.findViewById(R.id.tvParentName);
-        TextView tvParentEmail = headerView.findViewById(R.id.tvParentEmail);
+        TextView tvChildName = headerView.findViewById(R.id.tvChildName);
+        TextView tvChildStatus = headerView.findViewById(R.id.tvChildStatus);
+        ImageView headerProfileImage = headerView.findViewById(R.id.headerProfileImage);
+        TextView headerProfileIcon = headerView.findViewById(R.id.headerProfileIcon);
 
-        SharedPreferences prefs = getSharedPreferences("ParentPrefs", MODE_PRIVATE);
-        String parentName = prefs.getString("parentName", "Parent");
-        String parentEmail = prefs.getString("parentEmail", "");
+        SharedPreferences prefs = getSharedPreferences("ChildPrefs", MODE_PRIVATE);
+        String childName = prefs.getString("childName", "Child");
+        String childAvatar = prefs.getString("childAvatar", "👧");
 
-        if (tvParentName != null) tvParentName.setText(parentName);
-        if (tvParentEmail != null) tvParentEmail.setText(parentEmail);
+        if (tvChildName != null) {
+            tvChildName.setText(childName);
+        }
+
+        if (tvChildStatus != null) {
+            tvChildStatus.setText("● Active");
+        }
+
+        if (headerProfileImage != null && headerProfileIcon != null) {
+            if (childAvatar != null && (childAvatar.startsWith("content://") || childAvatar.startsWith("file://") ||
+                    childAvatar.startsWith("http://") || childAvatar.startsWith("https://"))) {
+                try {
+                    Glide.with(this)
+                            .load(childAvatar)
+                            .placeholder(R.drawable.circle_bg)
+                            .into(headerProfileImage);
+                    headerProfileImage.setVisibility(View.VISIBLE);
+                    headerProfileIcon.setVisibility(View.GONE);
+                } catch (Exception e) {
+                    headerProfileImage.setVisibility(View.GONE);
+                    headerProfileIcon.setVisibility(View.VISIBLE);
+                    headerProfileIcon.setText("👧");
+                }
+            } else {
+                headerProfileImage.setVisibility(View.GONE);
+                headerProfileIcon.setVisibility(View.VISIBLE);
+                headerProfileIcon.setText(childAvatar != null && !childAvatar.isEmpty() ? childAvatar : "👧");
+            }
+        }
     }
 
     @Override
@@ -155,36 +180,59 @@ public class ChildProfileActivity extends AppCompatActivity implements Navigatio
         if (id == R.id.nav_account) {
             startActivity(new Intent(this, AccountActivity.class));
         } else if (id == R.id.nav_profile) {
-            // Already here
         } else if (id == R.id.nav_progress_tracker) {
             startActivity(new Intent(this, ProgressTrackerActivity.class));
         } else if (id == R.id.nav_add_activity) {
             startActivity(new Intent(this, AddNewActivityActivity.class));
-        } else if (id == R.id.nav_view_rewards) {
-            startActivity(new Intent(this, RewardActivity.class));
         } else if (id == R.id.nav_theme) {
             startActivity(new Intent(this, ThemeCustomizationActivity.class));
         } else if (id == R.id.nav_logout) {
-            logout();
+            showLogoutDialog();
         }
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
 
-    private void logout() {
+    private void showLogoutDialog() {
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_logout, null);
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Logout");
-        builder.setMessage("Are you sure you want to logout?");
-        builder.setPositiveButton("YES", (dialog, which) -> {
-            getSharedPreferences("ChildPrefs", MODE_PRIVATE).edit().clear().apply();
+        builder.setView(dialogView);
+        builder.setCancelable(true);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        Button btnCancel = dialogView.findViewById(R.id.btnCancel);
+        Button btnYes = dialogView.findViewById(R.id.btnYes);
+
+        int nightMode = AppCompatDelegate.getDefaultNightMode();
+        boolean isDarkMode = (nightMode == AppCompatDelegate.MODE_NIGHT_YES) ||
+                (nightMode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM &&
+                        (getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES);
+
+        if (isDarkMode) {
+            btnCancel.setTextColor(ContextCompat.getColor(this, R.color.white));
+            btnYes.setTextColor(ContextCompat.getColor(this, R.color.white));
+            btnCancel.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.dark_card_bg));
+            btnYes.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.soft_blue));
+        } else {
+            btnCancel.setTextColor(ContextCompat.getColor(this, android.R.color.black));
+            btnYes.setTextColor(ContextCompat.getColor(this, android.R.color.black));
+            btnCancel.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.khaki));
+            btnYes.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.soft_blue));
+        }
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        btnYes.setOnClickListener(v -> {
+            dialog.dismiss();
             Intent intent = new Intent(ChildProfileActivity.this, GoodbyeActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();
         });
-        builder.setNegativeButton("CANCEL", null);
-        builder.show();
     }
 
     private void initViews() {
@@ -283,7 +331,6 @@ public class ChildProfileActivity extends AppCompatActivity implements Navigatio
     }
 
     private void selectAvatar(String emoji) {
-        // Check if emoji is allowed
         boolean isAllowed = false;
         for (String allowed : allowedEmojis) {
             if (allowed.equals(emoji)) {
@@ -418,7 +465,6 @@ public class ChildProfileActivity extends AppCompatActivity implements Navigatio
             etAge.setText("");
         }
 
-        // Set dob spinners based on current dob display if available
         String dobText = tvDob.getText().toString();
         if (!dobText.equals("Not set") && dobText.contains("/")) {
             try {
@@ -445,7 +491,6 @@ public class ChildProfileActivity extends AppCompatActivity implements Navigatio
             rbGirl.setChecked(true);
         }
 
-        // Highlight current avatar
         resetAvatarHighlight();
         highlightSelectedAvatar(selectedAvatar);
 
@@ -469,7 +514,6 @@ public class ChildProfileActivity extends AppCompatActivity implements Navigatio
         String name = etName.getText().toString().trim();
         String ageStr = etAge.getText().toString().trim();
 
-        // Validate age
         if (ageStr.isEmpty()) {
             etAge.setError("Age is required");
             etAge.requestFocus();
@@ -512,7 +556,6 @@ public class ChildProfileActivity extends AppCompatActivity implements Navigatio
             return;
         }
 
-        // Validate avatar is from allowed list
         boolean isValidAvatar = false;
         for (String allowed : allowedEmojis) {
             if (allowed.equals(selectedAvatar)) {
@@ -573,58 +616,6 @@ public class ChildProfileActivity extends AppCompatActivity implements Navigatio
                 .putString("childName", childName)
                 .putString("childAvatar", avatarValue)
                 .apply();
-    }
-
-    private void showLogoutDialog() {
-        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
-        builder.setTitle("Logout");
-        builder.setMessage("Are you sure you want to logout?");
-
-        // Set positive button (YES)
-        builder.setPositiveButton("YES", (dialog, which) -> {
-            getSharedPreferences("ChildPrefs", MODE_PRIVATE).edit().clear().apply();
-            Intent intent = new Intent(ChildProfileActivity.this, GoodbyeActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            finish();
-        });
-
-        // Set negative button (CANCEL)
-        builder.setNegativeButton("CANCEL", null);
-
-        // Create and show dialog
-        android.app.AlertDialog dialog = builder.create();
-        dialog.show();
-
-        // Get the buttons
-        Button positiveButton = dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE);
-        Button negativeButton = dialog.getButton(android.app.AlertDialog.BUTTON_NEGATIVE);
-
-        // Check current theme mode
-        int nightMode = AppCompatDelegate.getDefaultNightMode();
-        boolean isDarkMode = (nightMode == AppCompatDelegate.MODE_NIGHT_YES) ||
-                (nightMode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM &&
-                        (getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES);
-
-        if (positiveButton != null) {
-            if (isDarkMode) {
-                // Dark mode: use soft blue for YES
-                positiveButton.setTextColor(ContextCompat.getColor(this, R.color.soft_blue));
-            } else {
-                // Light mode: use black for YES
-                positiveButton.setTextColor(ContextCompat.getColor(this, android.R.color.black));
-            }
-        }
-
-        if (negativeButton != null) {
-            if (isDarkMode) {
-                // Dark mode: use white for CANCEL
-                negativeButton.setTextColor(ContextCompat.getColor(this, R.color.dark_text_primary));
-            } else {
-                // Light mode: use black for CANCEL
-                negativeButton.setTextColor(ContextCompat.getColor(this, android.R.color.black));
-            }
-        }
     }
 
     @Override

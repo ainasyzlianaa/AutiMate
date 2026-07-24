@@ -154,11 +154,11 @@ public class ChildHomeActivity extends AppCompatActivity implements NavigationVi
 
         loadMascotVideo();
 
-        // Load from SharedPreferences immediately (fast)
+        // Load from SharedPreferences immediately
         updateProgress();
         updateStreak();
 
-        // Then update from Firestore in background (slow)
+        // Update from Firestore
         loadProgressFromFirestore();
 
         setupClickListeners();
@@ -518,8 +518,6 @@ public class ChildHomeActivity extends AppCompatActivity implements NavigationVi
             startActivity(new Intent(this, ProgressTrackerActivity.class));
         } else if (id == R.id.nav_add_activity) {
             startActivity(new Intent(this, AddNewActivityActivity.class));
-        } else if (id == R.id.nav_view_rewards) {
-            startActivity(new Intent(this, RewardActivity.class));
         } else if (id == R.id.nav_theme) {
             startActivity(new Intent(this, ThemeCustomizationActivity.class));
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
@@ -601,7 +599,7 @@ public class ChildHomeActivity extends AppCompatActivity implements NavigationVi
         childId = childPrefs.getString("childId", "");
 
         loadActivities();
-        // Update from local cache instantly, then from Firestore in background
+        // Update from local cache instantly, then from Firestore
         updateProgress();
         updateStreak();
         loadProgressFromFirestore();

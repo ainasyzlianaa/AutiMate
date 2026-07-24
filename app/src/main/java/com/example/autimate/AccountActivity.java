@@ -63,6 +63,9 @@ public class AccountActivity extends AppCompatActivity implements NavigationView
                 if (childName != null) {
                     updateNavHeader(childName, childAvatar);
                 }
+                if (childAvatar != null) {
+                    updateNavHeader(childName, childAvatar);
+                }
             }
         }
     };
@@ -152,7 +155,7 @@ public class AccountActivity extends AppCompatActivity implements NavigationView
         AlertDialog dialog = builder.create();
         dialog.show();
 
-        // Set button colors based on theme
+        // Set button colors
         Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
         Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
 
@@ -195,19 +198,16 @@ public class AccountActivity extends AppCompatActivity implements NavigationView
             return;
         }
 
-        // Show progress indicator (disable buttons)
+        // Show progress indicator
         btnDeleteAccount.setEnabled(false);
         btnDeleteAccount.setText("DELETING...");
 
-        // Step 1: Delete child document from "children" collection
         db.collection("children").document(child.id)
                 .delete()
                 .addOnSuccessListener(aVoid -> {
-                    // Step 2: Remove child ID from parent's children array
                     db.collection("parents").document(parentId)
                             .update("children", FieldValue.arrayRemove(child.id))
                             .addOnSuccessListener(aVoid2 -> {
-                                // Step 3: Delete all activities for this child
                                 deleteChildActivities(child.id, parentId);
                             })
                             .addOnFailureListener(e -> {
@@ -224,7 +224,7 @@ public class AccountActivity extends AppCompatActivity implements NavigationView
     }
 
     private void deleteChildActivities(String childId, String parentId) {
-        // Delete all activities for this child
+        // Delete all activities for child
         db.collection("activities")
                 .whereEqualTo("childId", childId)
                 .whereEqualTo("parentId", parentId)
@@ -248,7 +248,7 @@ public class AccountActivity extends AppCompatActivity implements NavigationView
         String currentChildId = childPrefs.getString("childId", "");
 
         // Check if the deleted child was the currently selected one
-        // We need to check if the child was deleted from the list
+        // Check if the child was deleted from the list
         boolean wasCurrentChild = false;
         for (ChildProfile child : childList) {
             if (child.id.equals(currentChildId)) {
@@ -262,7 +262,6 @@ public class AccountActivity extends AppCompatActivity implements NavigationView
             childPrefs.edit().clear().apply();
         }
 
-        // Reset UI
         btnDeleteAccount.setEnabled(true);
         btnDeleteAccount.setText("DELETE ACCOUNT");
         selectedPosition = -1;
@@ -347,11 +346,16 @@ public class AccountActivity extends AppCompatActivity implements NavigationView
         if (headerView == null) return;
 
         TextView tvChildName = headerView.findViewById(R.id.tvChildName);
+        TextView tvChildStatus = headerView.findViewById(R.id.tvChildStatus);
         ImageView headerProfileImage = headerView.findViewById(R.id.headerProfileImage);
         TextView headerProfileIcon = headerView.findViewById(R.id.headerProfileIcon);
 
         if (tvChildName != null) {
             tvChildName.setText(childName != null && !childName.isEmpty() ? childName : "Child");
+        }
+
+        if (tvChildStatus != null) {
+            tvChildStatus.setText("● Active");
         }
 
         if (headerProfileImage != null && headerProfileIcon != null) {
@@ -383,37 +387,61 @@ public class AccountActivity extends AppCompatActivity implements NavigationView
         int id = item.getItemId();
 
         if (id == R.id.nav_account) {
-            // Already in account page
         } else if (id == R.id.nav_profile) {
             startActivity(new Intent(this, ChildProfileActivity.class));
         } else if (id == R.id.nav_progress_tracker) {
             startActivity(new Intent(this, ProgressTrackerActivity.class));
         } else if (id == R.id.nav_add_activity) {
             startActivity(new Intent(this, AddNewActivityActivity.class));
-        } else if (id == R.id.nav_view_rewards) {
-            startActivity(new Intent(this, RewardActivity.class));
         } else if (id == R.id.nav_theme) {
             startActivity(new Intent(this, ThemeCustomizationActivity.class));
         } else if (id == R.id.nav_logout) {
-            logout();
+            showLogoutDialog();
         }
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
 
-    private void logout() {
+    private void showLogoutDialog() {
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_logout, null);
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Logout");
-        builder.setMessage("Are you sure you want to logout?");
-        builder.setPositiveButton("YES", (dialog, which) -> {
+        builder.setView(dialogView);
+        builder.setCancelable(true);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        Button btnCancel = dialogView.findViewById(R.id.btnCancel);
+        Button btnYes = dialogView.findViewById(R.id.btnYes);
+
+        int nightMode = AppCompatDelegate.getDefaultNightMode();
+        boolean isDarkMode = (nightMode == AppCompatDelegate.MODE_NIGHT_YES) ||
+                (nightMode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM &&
+                        (getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES);
+
+        if (isDarkMode) {
+            btnCancel.setTextColor(ContextCompat.getColor(this, R.color.white));
+            btnYes.setTextColor(ContextCompat.getColor(this, R.color.white));
+            btnCancel.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.dark_card_bg));
+            btnYes.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.soft_blue));
+        } else {
+            btnCancel.setTextColor(ContextCompat.getColor(this, android.R.color.black));
+            btnYes.setTextColor(ContextCompat.getColor(this, android.R.color.black));
+            btnCancel.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.khaki));
+            btnYes.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.soft_blue));
+        }
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        btnYes.setOnClickListener(v -> {
+            dialog.dismiss();
             Intent intent = new Intent(AccountActivity.this, GoodbyeActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();
         });
-        builder.setNegativeButton("CANCEL", null);
-        builder.show();
     }
 
     @Override

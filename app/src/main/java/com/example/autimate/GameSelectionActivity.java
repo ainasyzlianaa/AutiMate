@@ -25,7 +25,6 @@ public class GameSelectionActivity extends AppCompatActivity {
         tvTitle = findViewById(R.id.tvTitle);
         tvSubtitle = findViewById(R.id.tvSubtitle);
 
-        // Set texts with proper colors for dark mode
         if (tvTitle != null) {
             tvTitle.setText("Let's Play!");
             tvTitle.setTextColor(getColor(R.color.text_dark)); // White in dark mode

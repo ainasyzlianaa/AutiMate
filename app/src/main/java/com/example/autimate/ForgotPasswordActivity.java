@@ -109,8 +109,6 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         Button btnOk = dialogView.findViewById(R.id.btnOk);
 
         tvEmail.setText(email);
-
-        // Resend option - resend the email
         tvResend.setOnClickListener(v -> {
             // Resend the reset email
             String emailAddress = tvEmail.getText().toString();

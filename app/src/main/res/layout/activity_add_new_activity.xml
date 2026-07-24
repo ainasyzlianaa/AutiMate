@@ -17,7 +17,8 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/cream"
-            app:title=""
+            app:title="Add New Activity"
+            app:titleTextColor="@color/text_dark"
             app:navigationIcon="@drawable/ic_menu"
             app:navigationIconTint="@color/brown"/>
 
@@ -88,15 +89,16 @@
 
     </LinearLayout>
 
+    <!-- SIDEBAR NAVIGATION MENU -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/navView"
         android:layout_width="280dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        app:headerLayout="@layout/nav_header_parent"
-        app:menu="@menu/navigation_menu_parent"
-        app:itemTextColor="@color/text_dark"
+        android:background="@color/white"
+        app:headerLayout="@layout/nav_header_child"
         app:itemIconTint="@color/light_brown"
-        android:background="@color/white"/>
+        app:itemTextColor="@color/text_dark"
+        app:menu="@menu/navigation_menu_child"/>
 
 </androidx.drawerlayout.widget.DrawerLayout>

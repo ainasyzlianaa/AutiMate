@@ -21,6 +21,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FieldValue;
@@ -48,7 +49,7 @@ public class AddNewActivityActivity extends AppCompatActivity implements Navigat
     private List<ActivityItem> allAvailableActivities;
     private boolean isLoading = false;
 
-    // Store reference to the add dialog so we can refresh it
+    // Store reference to the add dialog
     private AlertDialog addDialog;
 
     @Override
@@ -56,33 +57,20 @@ public class AddNewActivityActivity extends AppCompatActivity implements Navigat
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_new_activity);
 
-        toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
+        // Setup drawer
+        setupDrawer();
 
-        drawerLayout = findViewById(R.id.drawerLayout);
-        navigationView = findViewById(R.id.navView);
-        activityListContainer = findViewById(R.id.activityListContainer);
-        btnAddNewActivity = findViewById(R.id.btnAddNewActivity);
-        tvCurrentActivities = findViewById(R.id.tvCurrentActivities);
-
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawerLayout, toolbar, R.string.app_name, R.string.app_name);
-        drawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
-        navigationView.setNavigationItemSelectedListener(this);
-
+        db = FirebaseFirestore.getInstance();
         SharedPreferences childPrefs = getSharedPreferences("ChildPrefs", MODE_PRIVATE);
         childId = childPrefs.getString("childId", "");
         childName = childPrefs.getString("childName", "");
         parentId = getSharedPreferences("ParentPrefs", MODE_PRIVATE).getString("parentId", "");
-        db = FirebaseFirestore.getInstance();
 
-        updateNavHeader();
+        activityListContainer = findViewById(R.id.activityListContainer);
+        btnAddNewActivity = findViewById(R.id.btnAddNewActivity);
+        tvCurrentActivities = findViewById(R.id.tvCurrentActivities);
+
         initAvailableActivities();
-
         existingActivities = new ArrayList<>();
 
         btnAddNewActivity.setOnClickListener(v -> {
@@ -93,6 +81,111 @@ public class AddNewActivityActivity extends AppCompatActivity implements Navigat
                 Toast.makeText(this, "Error opening dialog: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void setupDrawer() {
+        toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
+        drawerLayout = findViewById(R.id.drawerLayout);
+        navigationView = findViewById(R.id.navView);
+
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawerLayout, toolbar, R.string.app_name, R.string.app_name);
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+        navigationView.setNavigationItemSelectedListener(this);
+
+        updateNavHeader();
+    }
+
+    private void updateNavHeader() {
+        if (navigationView == null) return;
+        View headerView = navigationView.getHeaderView(0);
+        TextView tvChildName = headerView.findViewById(R.id.tvChildName);
+        TextView tvChildStatus = headerView.findViewById(R.id.tvChildStatus);
+        ImageView headerProfileImage = headerView.findViewById(R.id.headerProfileImage);
+        TextView headerProfileIcon = headerView.findViewById(R.id.headerProfileIcon);
+
+        SharedPreferences prefs = getSharedPreferences("ChildPrefs", MODE_PRIVATE);
+        String childName = prefs.getString("childName", "Child");
+        String childAvatar = prefs.getString("childAvatar", "👧");
+
+        if (tvChildName != null) {
+            tvChildName.setText(childName);
+        }
+
+        if (tvChildStatus != null) {
+            tvChildStatus.setText("● Active");
+        }
+
+        if (headerProfileImage != null && headerProfileIcon != null) {
+            if (childAvatar != null && (childAvatar.startsWith("content://") || childAvatar.startsWith("file://") ||
+                    childAvatar.startsWith("http://") || childAvatar.startsWith("https://"))) {
+                try {
+                    Glide.with(this)
+                            .load(childAvatar)
+                            .placeholder(R.drawable.circle_bg)
+                            .into(headerProfileImage);
+                    headerProfileImage.setVisibility(View.VISIBLE);
+                    headerProfileIcon.setVisibility(View.GONE);
+                } catch (Exception e) {
+                    headerProfileImage.setVisibility(View.GONE);
+                    headerProfileIcon.setVisibility(View.VISIBLE);
+                    headerProfileIcon.setText("👧");
+                }
+            } else {
+                headerProfileImage.setVisibility(View.GONE);
+                headerProfileIcon.setVisibility(View.VISIBLE);
+                headerProfileIcon.setText(childAvatar != null && !childAvatar.isEmpty() ? childAvatar : "👧");
+            }
+        }
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.nav_account) {
+            startActivity(new Intent(this, AccountActivity.class));
+        } else if (id == R.id.nav_profile) {
+            startActivity(new Intent(this, ChildProfileActivity.class));
+        } else if (id == R.id.nav_progress_tracker) {
+            startActivity(new Intent(this, ProgressTrackerActivity.class));
+        } else if (id == R.id.nav_add_activity) {
+        } else if (id == R.id.nav_theme) {
+            startActivity(new Intent(this, ThemeCustomizationActivity.class));
+        } else if (id == R.id.nav_logout) {
+            logout();
+        }
+
+        drawerLayout.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    private void logout() {
+        new AlertDialog.Builder(this)
+                .setTitle("Logout")
+                .setMessage("Are you sure you want to logout?")
+                .setPositiveButton("YES", (dialog, which) -> {
+                    Intent intent = new Intent(AddNewActivityActivity.this, GoodbyeActivity.class);
+                    startActivity(intent);
+                    finish();
+                })
+                .setNegativeButton("CANCEL", null)
+                .show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override
@@ -108,7 +201,6 @@ public class AddNewActivityActivity extends AppCompatActivity implements Navigat
         allAvailableActivities.add(new ActivityItem("Wash Hands", getDrawableId("hands")));
         allAvailableActivities.add(new ActivityItem("Sleep", getDrawableId("sleep")));
         allAvailableActivities.add(new ActivityItem("Pack School Bag", getDrawableId("bag")));
-        // Removed "Wear Clothes" from the list
     }
 
     private int getDrawableId(String name) {
@@ -263,7 +355,6 @@ public class AddNewActivityActivity extends AppCompatActivity implements Navigat
                 return;
             }
 
-            // Refresh the available activities list before showing
             refreshAvailableActivities(activitiesGrid);
 
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -276,7 +367,6 @@ public class AddNewActivityActivity extends AppCompatActivity implements Navigat
             addDialog = builder.create();
             addDialog.show();
 
-            // Change "Close" button color based on theme
             Button closeButton = addDialog.getButton(AlertDialog.BUTTON_POSITIVE);
             if (closeButton != null) {
                 closeButton.setTextColor(ContextCompat.getColor(this, R.color.text_dark));
@@ -289,13 +379,9 @@ public class AddNewActivityActivity extends AppCompatActivity implements Navigat
         }
     }
 
-    /**
-     * Refresh the available activities in the dialog grid
-     */
     private void refreshAvailableActivities(LinearLayout activitiesGrid) {
         activitiesGrid.removeAllViews();
 
-        // Reload existing activities first to get latest data
         loadExistingActivities();
 
         List<ActivityItem> availableToAdd = new ArrayList<>();
@@ -388,7 +474,6 @@ public class AddNewActivityActivity extends AppCompatActivity implements Navigat
                 Toast.makeText(this, "Added: " + activity.name, Toast.LENGTH_SHORT).show();
             }
 
-            // Refresh the add dialog if it's still open
             refreshAddDialog();
         });
         builder.setNegativeButton("CANCEL", (dialog, which) -> {});
@@ -411,18 +496,12 @@ public class AddNewActivityActivity extends AppCompatActivity implements Navigat
         }
     }
 
-    /**
-     * Refresh the add activity dialog content without closing it
-     */
     private void refreshAddDialog() {
         if (addDialog != null && addDialog.isShowing()) {
-            // Get the dialog's content view
             View dialogView = addDialog.getWindow().getDecorView().findViewById(android.R.id.content);
             if (dialogView != null) {
-                // Find the activitiesGrid inside the dialog
                 LinearLayout activitiesGrid = dialogView.findViewById(R.id.activitiesGrid);
                 if (activitiesGrid != null) {
-                    // Refresh the grid
                     refreshAvailableActivities(activitiesGrid);
                 }
             }
@@ -452,7 +531,6 @@ public class AddNewActivityActivity extends AppCompatActivity implements Navigat
                     displayCurrentActivities();
                     Toast.makeText(this, "✅ Added: " + activity.name, Toast.LENGTH_SHORT).show();
 
-                    // Refresh the add dialog after successful addition
                     refreshAddDialog();
                 })
                 .addOnFailureListener(e -> {
@@ -535,64 +613,6 @@ public class AddNewActivityActivity extends AppCompatActivity implements Navigat
             return "activities_" + childId;
         }
         return "activities";
-    }
-
-    private void updateNavHeader() {
-        View headerView = navigationView.getHeaderView(0);
-        TextView tvParentName = headerView.findViewById(R.id.tvParentName);
-        TextView tvParentEmail = headerView.findViewById(R.id.tvParentEmail);
-
-        SharedPreferences prefs = getSharedPreferences("ParentPrefs", MODE_PRIVATE);
-        String parentName = prefs.getString("parentName", "Parent");
-
-        if (tvParentName != null) tvParentName.setText(parentName);
-        if (tvParentEmail != null) tvParentEmail.setText("Parent Account");
-    }
-
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.nav_account) {
-            startActivity(new Intent(this, AccountActivity.class));
-        } else if (id == R.id.nav_profile) {
-            startActivity(new Intent(this, ChildProfileActivity.class));
-        } else if (id == R.id.nav_progress_tracker) {
-            startActivity(new Intent(this, ProgressTrackerActivity.class));
-        } else if (id == R.id.nav_add_activity) {
-            // Already here
-        } else if (id == R.id.nav_view_rewards) {
-            startActivity(new Intent(this, RewardActivity.class));
-        } else if (id == R.id.nav_theme) {
-            startActivity(new Intent(this, ThemeCustomizationActivity.class));
-        } else if (id == R.id.nav_logout) {
-            logout();
-        }
-
-        drawerLayout.closeDrawer(GravityCompat.START);
-        return true;
-    }
-
-    private void logout() {
-        new AlertDialog.Builder(this)
-                .setTitle("Logout")
-                .setMessage("Are you sure you want to logout?")
-                .setPositiveButton("YES", (dialog, which) -> {
-                    Intent intent = new Intent(AddNewActivityActivity.this, GoodbyeActivity.class);
-                    startActivity(intent);
-                    finish();
-                })
-                .setNegativeButton("CANCEL", null)
-                .show();
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            drawerLayout.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
     }
 
     static class ActivityItem {

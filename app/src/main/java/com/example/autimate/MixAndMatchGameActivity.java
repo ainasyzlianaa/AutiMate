@@ -400,7 +400,7 @@ public class MixAndMatchGameActivity extends AppCompatActivity {
 
     private void playHooraySound() {
         try {
-            // Release any existing hooray sound
+            // Release hooray sound
             if (hooraySound != null) {
                 hooraySound.release();
                 hooraySound = null;
@@ -426,7 +426,6 @@ public class MixAndMatchGameActivity extends AppCompatActivity {
 
     private void loadCongratulationsVideo(VideoView videoView) {
         try {
-            // Try to load congratulations.mp4 from raw folder
             int rawResourceId = getResources().getIdentifier("congratulations", "raw", getPackageName());
 
             if (rawResourceId != 0 && videoView != null) {
@@ -445,7 +444,6 @@ public class MixAndMatchGameActivity extends AppCompatActivity {
                     return true;
                 });
             } else {
-                // If congratulations.mp4 doesn't exist, hide the VideoView
                 if (videoView != null) {
                     videoView.setVisibility(View.GONE);
                 }
